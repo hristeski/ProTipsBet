@@ -1,0 +1,169 @@
+@import "tailwindcss";
+
+/* =========================================================
+   ScrollBar - тенка, "терен" зелена, се вклопува со темата
+   ========================================================= */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #10b981, #059669);
+  border-radius: 999px;
+  border: 2px solid #0a0a0a;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #34d399, #10b981);
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #10b981 #0a0a0a;
+}
+html {
+  scroll-behavior: smooth;
+}
+
+/* =========================================================
+   Фудбалски терен pattern - се користи како позадина на
+   hero / VIP секции преку класата .pitch-lines
+   ========================================================= */
+.pitch-lines {
+  position: relative;
+  isolation: isolate;
+}
+.pitch-lines::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(16, 185, 129, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 185, 129, 0.08) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 40%, transparent 100%);
+}
+
+/* Кружна "central circle" декорација, се вклопува зад hero-то */
+.pitch-circle::after {
+  content: "";
+  position: absolute;
+  width: 480px;
+  height: 480px;
+  border: 1.5px solid rgba(16, 185, 129, 0.15);
+  border-radius: 999px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* =========================================================
+   Marquee (постоечка) - за партнери и рекламни банери
+   ========================================================= */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+  display: flex;
+  width: max-content;
+}
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* =========================================================
+   Reveal on scroll - лесна, дискретна анимација за секции
+   ========================================================= */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.reveal {
+  animation: fadeInUp 0.6s ease-out both;
+}
+
+/* Пулсирачки "live" indicator - за VIP notifikacii/токчиња */
+@keyframes pulseDot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55); }
+  70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+}
+.pulse-dot {
+  animation: pulseDot 1.8s ease-out infinite;
+}
+
+/* Toast slide-in (нотификации за попусти / нови VIP тикети) */
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.toast-in {
+  animation: toastIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Почитување на reduced-motion преференца на корисникот */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* =========================================================
+   Floating background objects (топки/трофеи зад hero-то)
+   ========================================================= */
+@keyframes floatDrift {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  25%  { transform: translate(10px, -18px) rotate(8deg); }
+  50%  { transform: translate(-6px, -8px) rotate(-6deg); }
+  75%  { transform: translate(8px, 14px) rotate(5deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+.floating-item {
+  animation-name: floatDrift;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .floating-item {
+    animation: none !important;
+  }
+}
+
+/* Гејнер counter-up бројки (win rate / units profit) - користи ја .count-up за
+   финиот "pop" ефект штом влезат во приказ (се комбинира со reveal) */
+@keyframes popIn {
+  0% { opacity: 0; transform: scale(0.85); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.count-up {
+  animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Тенка "shine" линија преку card-ови за истакнатите планови/статистики */
+@keyframes shine {
+  0% { transform: translateX(-120%) skewX(-15deg); }
+  100% { transform: translateX(220%) skewX(-15deg); }
+}
+.shine-hover {
+  position: relative;
+  overflow: hidden;
+}
+.shine-hover::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 40%; height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.06), transparent);
+  transform: translateX(-120%) skewX(-15deg);
+}
+.shine-hover:hover::after {
+  animation: shine 0.9s ease;
+}
