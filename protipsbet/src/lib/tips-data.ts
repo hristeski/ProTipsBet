@@ -1,3 +1,5 @@
+// FILE DESTINATION: src/lib/tips-data.ts
+
 export type Market = "1X2" | "BTTS" | "OU25";
 
 export const MARKET_LABELS: Record<Market, string> = {

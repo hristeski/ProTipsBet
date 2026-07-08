@@ -35,7 +35,7 @@ export default function Home() {
           </motion.h1>
 
           <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-zinc-400 mb-10 text-lg">
-            Every tip goes through statistical analysis before it's published. No results are hidden — everything is verified and public.
+            Every tip goes through statistical analysis before it's published. No results are hidden — everything is 100% verified and public.
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -61,9 +61,9 @@ export default function Home() {
       {/* 3. QUICK FEATURES */}
       <section className="reveal px-6 py-20 max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
-          { title: "Data-Driven", desc: "AI models trained on xG, player form, and historical stats.", icon: TrendingUp },
+          { title: "Deep Statistical Edge", desc: "Stop relying on luck. Our analytics process thousands of data points to find genuine value bets against the bookmakers.", icon: TrendingUp },
           { title: "Verified Slips", desc: "100% transparent history. We track every win and loss.", icon: ShieldCheck },
-          { title: "Instant Access", desc: "Pay with Crypto and unlock the VIP dashboard instantly.", icon: Zap }
+          { title: "Instant Access", desc: "Get immediate access to our premium dashboard. See exact unit sizes, high-value odds, and transparent staking plans.", icon: Zap }
         ].map((feat, i) => (
           <div key={i} className="shine-hover bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl flex items-start gap-4">
             <div className="bg-zinc-950 p-3 rounded-xl border border-zinc-800"><feat.icon size={20} className="text-emerald-400" /></div>

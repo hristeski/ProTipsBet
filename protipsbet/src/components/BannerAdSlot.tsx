@@ -1,3 +1,5 @@
+// FILE DESTINATION: src/components/BannerAdSlot.tsx
+
 interface BannerAdSlotProps {
   id: string;
   href?: string;

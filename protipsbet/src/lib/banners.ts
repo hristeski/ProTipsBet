@@ -1,3 +1,5 @@
+// FILE DESTINATION: src/lib/banners.ts
+
 import type { BannerData } from "@/components/BannerWall";
 
 // 50 slots total. Fill in href/imgSrc once you have real advertisers.

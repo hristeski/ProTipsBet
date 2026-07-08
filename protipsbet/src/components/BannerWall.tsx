@@ -1,3 +1,5 @@
+// FILE DESTINATION: src/components/BannerWall.tsx
+
 import BannerAdSlot from "./BannerAdSlot";
 
 export interface BannerData {

@@ -34,10 +34,7 @@ export function AboutUs() {
     <section className="reveal px-6 py-16 max-w-3xl mx-auto text-center">
       <h2 className="text-3xl md:text-4xl font-black text-white mb-4">About ProTipsBet</h2>
       <p className="text-zinc-400 text-sm md:text-base leading-relaxed">
-        A team of analysts and statisticians who process xG data, team form, and
-        historical results every day to isolate matches with a real statistical
-        edge. Every tip is logged publicly on the History page — win or loss,
-        no exceptions.
+       Driven by data. Proven by transparency. Our statisticians process thousands of metrics daily to find your betting edge. We hold ourselves to 100% accountability—every result is verified publicly, with zero exceptions
       </p>
     </section>
   );
