@@ -5,10 +5,11 @@ namespace ProTipsBet.Api.Models
 {
     public enum PlanType
     {
-        Weekly = 0,
-        Monthly = 1,
-        Quarterly = 2,
-        Yearly = 3
+        Daily = 0,
+        Weekly = 1,
+        Monthly = 2,
+        Quarterly = 3,
+        Yearly = 4
     }
 
     public enum SubscriptionStatus

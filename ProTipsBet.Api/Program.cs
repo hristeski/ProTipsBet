@@ -8,6 +8,7 @@ using ProTipsBet.Api.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 
 // ---------- Database (PostgreSQL) ----------
@@ -101,6 +102,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseCors("FrontendPolicy");
 app.UseAuthentication();
 app.UseAuthorization();

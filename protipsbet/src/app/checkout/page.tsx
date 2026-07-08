@@ -39,18 +39,33 @@ function CheckoutContent() {
   const handleFinalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    // TODO: wire to your C# backend, e.g.:
-    // const form = new FormData();
-    // form.append("email", email);
-    // form.append("password", password);
-    // form.append("planId", plan.id);
-    // form.append("paymentMethod", selectedMethod!);
-    // form.append("proof", proofFile!);
-    // await fetch("/api/payments/submit", { method: "POST", body: form });
-    await new Promise((r) => setTimeout(r, 900)); // simulated network delay
-    setSubmitting(false);
-    setStep("pending");
-  };
+    
+    try {
+        const form = new FormData();
+        form.append("email", email);
+        form.append("password", password);
+        form.append("planId", plan.id);
+        form.append("paymentMethod", selectedMethod!);
+        form.append("proof", proofFile!);
+
+        // ВАЖНО: Смени го портот 5000 со тој што ти го даде 'dotnet run'
+        const response = await fetch("http://localhost:5103/api/payments/submit", { 
+            method: "POST", 
+            body: form 
+        });
+
+        if (!response.ok) {
+            throw new Error("Payment submission failed");
+        }
+
+        setStep("pending");
+    } catch (error) {
+        console.error("Грешка при испраќање:", error);
+        alert("Имаше проблем со серверот. Провери дали бекендот е вклучен.");
+    } finally {
+        setSubmitting(false);
+    }
+};
 
   return (
     <div className="pb-24 px-4 pt-8 max-w-lg mx-auto">

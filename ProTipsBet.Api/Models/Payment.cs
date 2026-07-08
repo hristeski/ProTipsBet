@@ -11,7 +11,8 @@ namespace ProTipsBet.Api.Models
         PayPal = 3,
         WesternUnion = 4,
         Mpesa = 5,
-        Other = 6
+        Ria = 6,
+        Other = 7
     }
 
     public enum PaymentStatus
@@ -41,12 +42,11 @@ namespace ProTipsBet.Api.Models
 
         public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
 
-        // For manual confirmation flow (Skrill/Neteller/Western Union/Mpesa receipts)
         [MaxLength(500)]
         public string? ReceiptUrl { get; set; }
 
         [MaxLength(255)]
-        public string? TransactionReference { get; set; } // e.g. crypto tx hash, WU MTCN, etc.
+        public string? TransactionReference { get; set; }
 
         [MaxLength(500)]
         public string? AdminNote { get; set; }

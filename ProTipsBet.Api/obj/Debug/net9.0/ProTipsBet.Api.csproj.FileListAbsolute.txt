@@ -130,3 +130,5 @@ C:\protipsbet\protipsbet.api\obj\Debug\net9.0\refint\ProTipsBet.Api.dll
 C:\protipsbet\protipsbet.api\obj\Debug\net9.0\ProTipsBet.Api.pdb
 C:\protipsbet\protipsbet.api\obj\Debug\net9.0\ProTipsBet.Api.genruntimeconfig.cache
 C:\protipsbet\protipsbet.api\obj\Debug\net9.0\ref\ProTipsBet.Api.dll
+C:\protipsbet\ProTipsBet.Api\obj\Debug\net9.0\ProTipsBet.Api.sourcelink.json
+C:\protipsbet\ProTipsBet.Api\bin\Debug\net9.0\ProTipsBet.Api.staticwebassets.runtime.json
