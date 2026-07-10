@@ -8,9 +8,9 @@ using ProTipsBet.Api.Models;
 namespace ProTipsBet.Api.Controllers
 {
     [ApiController]
-    [Route("api/admin/tips")] // Фиксна рута
-    [Authorize] 
-    public class AdminTipsController : ControllerBase // Сменето име за да нема конфликт!
+    [Route("api/admin/tips")]
+    [Authorize(Roles = "Admin")] // FIX: was [Authorize] only — any logged-in user (incl. paying customers) could hit this
+    public class AdminTipsController : ControllerBase
     {
         private readonly AppDbContext _db;
 
@@ -35,26 +35,31 @@ namespace ProTipsBet.Api.Controllers
                     Analysis = t.Analysis,
                     IsPublished = t.IsPublished
                 }).ToListAsync();
-            
+
             return Ok(tips);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Tip>> CreateTip(CreateTipRequest request)
+        public async Task<ActionResult<Tip>> CreateTip([FromBody] CreateTipDto request)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var tip = new Tip
             {
-                HomeTeam = request.HomeTeam,
-                AwayTeam = request.AwayTeam,
-                League = request.League,
+                HomeTeam = request.HomeTeam ?? "Unknown",
+                AwayTeam = request.AwayTeam ?? "Unknown",
+                League = request.League ?? "Unknown",
                 MatchDate = request.MatchDate,
-                PredictionType = request.PredictionType,
+                PredictionType = request.PredictionType ?? "",
                 Odds = request.Odds,
                 IsVip = request.IsVip,
-                Analysis = request.Analysis,
-                IsPublished = request.IsPublished
+                Analysis = request.Analysis ?? "",
+                IsPublished = request.IsPublished,
+                Result = TipResult.Pending,
+                CreatedAt = DateTime.UtcNow
             };
-            
+
             _db.Tips.Add(tip);
             await _db.SaveChangesAsync();
             return Ok(tip);
@@ -74,9 +79,33 @@ namespace ProTipsBet.Api.Controllers
             }
             return BadRequest("Invalid result value.");
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteTip(int id)
+        {
+            var tip = await _db.Tips.FindAsync(id);
+            if (tip == null) return NotFound();
+
+            _db.Tips.Remove(tip);
+            await _db.SaveChangesAsync();
+
+            return Ok(new { message = "Tip deleted successfully." });
+        }
     }
 
-    // Мал модел за да спречиме JSON парсирање грешки
+    public class CreateTipDto
+    {
+        public string HomeTeam { get; set; } = string.Empty;
+        public string AwayTeam { get; set; } = string.Empty;
+        public string? League { get; set; }
+        public DateTime MatchDate { get; set; }
+        public string PredictionType { get; set; } = string.Empty;
+        public decimal Odds { get; set; }
+        public bool IsVip { get; set; }
+        public bool IsPublished { get; set; }
+        public string? Analysis { get; set; }
+    }
+
     public class UpdateResultDto
     {
         public string Result { get; set; } = string.Empty;

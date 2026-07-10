@@ -15,6 +15,11 @@ namespace ProTipsBet.Api.Data
         public DbSet<Payment> Payments => Set<Payment>();
         public DbSet<Banner> Banners => Set<Banner>();
         public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
+        public DbSet<TicketRecord> TicketRecords { get; set; }
+        // public DbSet<TicketRecordLeg> TicketRecordLegs => Set<TicketRecordLeg>();
+public DbSet<TicketRecordLeg> TicketRecordLegs { get; set; }        
+
+public DbSet<DiscountCode> DiscountCodes => Set<DiscountCode>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -59,6 +64,12 @@ namespace ProTipsBet.Api.Data
                 .WithMany(s => s.Payments)
                 .HasForeignKey(p => p.SubscriptionId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+                  modelBuilder.Entity<TicketRecordLeg>()
+        .HasOne(l => l.TicketRecord)
+        .WithMany(t => t.Legs)
+        .HasForeignKey(l => l.TicketRecordId)
+        .OnDelete(DeleteBehavior.Cascade);
 
             // Store enums as strings for readability in DB (optional but recommended)
             modelBuilder.Entity<User>().Property(u => u.Role).HasConversion<string>();

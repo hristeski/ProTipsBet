@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, Mail, Loader2, ShieldAlert } from "lucide-react";
+import { API_BASE } from "@/lib/api";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -17,7 +18,7 @@ export default function AdminLogin() {
     setError(null);
 
     try {
-      const res = await fetch("http://localhost:5103/api/auth/login", {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -26,16 +27,19 @@ export default function AdminLogin() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Погрешен email или лозинка.");
+        throw new Error(data.message || "Wrong email or password.");
       }
 
-      // Ако е успешно, зачувај го токенот во localStorage
-      localStorage.setItem("protipsbet_token", data.token);
+      // Login succeeded, but that alone doesn't mean this person is an admin -
+      // a regular VIP customer can log in with valid credentials too.
+      if (data.user?.role !== "Admin") {
+        throw new Error("This account doesn't have admin access.");
+      }
 
-      // Пренасочи кон Tips Manager-от
+      localStorage.setItem("protipsbet_token", data.token);
       router.push("/admin/tips");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -47,7 +51,7 @@ export default function AdminLogin() {
         <h1 className="font-black text-3xl text-white tracking-tighter mb-2">
           ProTips<span className="text-emerald-500">Admin</span>
         </h1>
-        <p className="text-neutral-500 text-sm">Најави се за да пристапиш до контролната табла</p>
+        <p className="text-neutral-500 text-sm">Log in to access the control panel</p>
       </div>
 
       {error && (
@@ -60,7 +64,7 @@ export default function AdminLogin() {
       <form onSubmit={handleLogin} className="space-y-5">
         <div>
           <label className="block text-xs font-bold text-neutral-400 mb-2 uppercase tracking-wider">
-            Email Адреса
+            Email Address
           </label>
           <div className="relative">
             <Mail className="absolute left-3 top-3 text-neutral-500" size={18} />
@@ -77,7 +81,7 @@ export default function AdminLogin() {
 
         <div>
           <label className="block text-xs font-bold text-neutral-400 mb-2 uppercase tracking-wider">
-            Лозинка
+            Password
           </label>
           <div className="relative">
             <Lock className="absolute left-3 top-3 text-neutral-500" size={18} />
@@ -97,7 +101,7 @@ export default function AdminLogin() {
           disabled={loading}
           className="w-full flex items-center justify-center gap-2 py-3.5 bg-emerald-500 text-neutral-950 font-black rounded-xl hover:bg-emerald-400 transition-colors disabled:opacity-60 mt-2"
         >
-          {loading ? <Loader2 size={18} className="animate-spin" /> : "Најави се"}
+          {loading ? <Loader2 size={18} className="animate-spin" /> : "Log In"}
         </button>
       </form>
     </div>

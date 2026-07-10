@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ShieldCheck, Zap, TrendingUp, Crown } from "lucide-react";
+import { ArrowRight, ShieldCheck, Zap, TrendingUp, Crown, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import TipCard from "@/components/TipCard";
 import BannerWall from "@/components/BannerWall";
@@ -10,10 +11,49 @@ import Testimonials from "@/components/Testimonials";
 import WinRateTable from "@/components/WinRateTable";
 import { HowItWorks, AboutUs } from "@/components/LandingSections";
 import { HOME_BANNERS } from "@/lib/banners";
-import { TODAY_FREE_TIPS } from "@/lib/tips-data";
+import { API_BASE, authHeaders } from "@/lib/api";
+import { getTipStatus, formatMatchTime } from "@/lib/tip-format";
+
+interface ApiTip {
+  id: number;
+  homeTeam: string;
+  awayTeam: string;
+  league?: string;
+  matchDate?: string;
+  predictionType?: string;
+  odds: number;
+  result?: string;
+  isVip: boolean;
+}
 
 export default function Home() {
   const partners = ["BET365", "PINNACLE", "SOFASCORE", "1XBET", "BINANCE PAY", "SKRILL"];
+
+  const [freeTips, setFreeTips] = useState<ApiTip[]>([]);
+  const [loadingTips, setLoadingTips] = useState(true);
+
+  useEffect(() => {
+    const fetchFreeTips = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/tips`, { headers: authHeaders() });
+        const data = await res.json();
+        const tips: ApiTip[] = Array.isArray(data) ? data : [];
+
+        // Only free, currently pending tips on the homepage — cap at 4 for layout.
+        const pendingFree = tips
+          .filter((t) => !t.isVip && getTipStatus(t.result) === "pending")
+          .slice(0, 4);
+
+        setFreeTips(pendingFree);
+      } catch {
+        setFreeTips([]);
+      } finally {
+        setLoadingTips(false);
+      }
+    };
+
+    fetchFreeTips();
+  }, []);
 
   return (
     <div className="w-full bg-zinc-950 text-zinc-50 font-sans">
@@ -83,27 +123,39 @@ export default function Home() {
         <BannerWall title="Sponsored" banners={HOME_BANNERS} />
       </div>
 
-      {/* 5. TODAY'S FREE PICKS */}
+      {/* 5. TODAY'S FREE PICKS — now live from the backend */}
       <section id="free-picks" className="px-6 pb-24 max-w-4xl mx-auto">
         <div className="text-center mb-10">
           <h2 className="text-3xl font-black text-white mb-2">Today's Free Picks</h2>
           <p className="text-zinc-400 text-sm">Test our accuracy. For high-confidence combos, upgrade to VIP.</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {TODAY_FREE_TIPS.map((tip) => (
-            <TipCard
-              key={tip.id}
-              league={tip.league}
-              matchTime={tip.matchTime}
-              homeTeam={tip.homeTeam}
-              awayTeam={tip.awayTeam}
-              prediction={tip.prediction}
-              odds={tip.odds}
-              status={tip.status}
-              isVip={false}
-            />
-          ))}
-        </div>
+
+        {loadingTips ? (
+          <div className="flex justify-center py-10">
+            <Loader2 className="animate-spin text-emerald-500" size={32} />
+          </div>
+        ) : freeTips.length === 0 ? (
+          <div className="text-center py-12 border border-zinc-800 border-dashed rounded-2xl text-zinc-500 text-sm">
+            No free picks published yet today — check back soon.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {freeTips.map((tip) => (
+              <TipCard
+                key={tip.id}
+                league={tip.league && tip.league !== "Unknown" ? tip.league : "Football"}
+                matchTime={formatMatchTime(tip.matchDate)}
+                homeTeam={tip.homeTeam}
+                awayTeam={tip.awayTeam}
+                prediction={tip.predictionType || "No prediction"}
+                odds={Number(tip.odds) || 0}
+                status={getTipStatus(tip.result)}
+                isVip={false}
+              />
+            ))}
+          </div>
+        )}
+
         <div className="text-center mt-8">
           <Link href="/free-tips" className="text-emerald-400 text-sm font-bold hover:underline inline-flex items-center gap-1">
             All free picks + archive <ArrowRight size={14} />

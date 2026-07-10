@@ -1,5 +1,4 @@
-// FILE DESTINATION: src/components/TipCard.tsx
-
+// src/components/TipCard.tsx
 import { Lock } from "lucide-react";
 
 interface TipCardProps {
@@ -12,7 +11,7 @@ interface TipCardProps {
   status: "pending" | "win" | "loss";
   isVip?: boolean;
   isUnlocked?: boolean;
-  date?: string; // e.g. "Today", "July 8, 2026"
+  date?: string;
 }
 
 export default function TipCard({
@@ -27,9 +26,9 @@ export default function TipCard({
   isUnlocked = true,
   date,
 }: TipCardProps) {
+  
   return (
     <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 relative overflow-hidden flex flex-col mb-3 shadow-lg">
-
       <div className="flex justify-between items-center mb-4 border-b border-neutral-800 pb-2">
         <span className="text-xs font-bold uppercase tracking-wider text-neutral-500">
           {league}

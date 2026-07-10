@@ -1,9 +1,7 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProTipsBet.Api.Data;
-using ProTipsBet.Api.DTOs;
-using ProTipsBet.Api.Models;
+using System.Security.Claims;
 
 namespace ProTipsBet.Api.Controllers
 {
@@ -13,161 +11,74 @@ namespace ProTipsBet.Api.Controllers
     {
         private readonly AppDbContext _db;
 
-        public TipsController(AppDbContext db)
-        {
-            _db = db;
-        }
+        public TipsController(AppDbContext db) => _db = db;
 
-        // GET /api/tips?date=2026-07-08&vipOnly=false
-        // Public endpoint. VIP tips are returned but with prediction details masked
-        // unless the caller is an authenticated, active VIP user (or Admin).
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TipResponse>>> GetTips([FromQuery] DateTime? date, [FromQuery] bool? vipOnly)
+        public async Task<IActionResult> GetPublicTips()
         {
-            var query = _db.Tips.Where(t => t.IsPublished).AsQueryable();
+            bool isVipUser = false;
+            var userIdClaim = User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value
+                              ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (date.HasValue)
+            if (userIdClaim != null && int.TryParse(userIdClaim, out var userId))
             {
-                var day = date.Value.Date;
-                query = query.Where(t => t.MatchDate.Date == day);
+                var user = await _db.Users.FindAsync(userId);
+                if (user != null && user.IsVip && (user.VipExpiresAt == null || user.VipExpiresAt > DateTime.UtcNow))
+                {
+                    isVipUser = true;
+                }
             }
 
-            if (vipOnly.HasValue)
-                query = query.Where(t => t.IsVip == vipOnly.Value);
-
-            var tips = await query.OrderBy(t => t.MatchDate).ToListAsync();
-
-            var userCanSeeVip = UserCanSeeVipContent();
-
-            var result = tips.Select(t => MapToDto(t, userCanSeeVip));
-            return Ok(result);
-        }
-
-        // GET /api/tips/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<TipResponse>> GetTip(int id)
-        {
-            var tip = await _db.Tips.FindAsync(id);
-            if (tip == null || !tip.IsPublished)
-                return NotFound();
-
-            var userCanSeeVip = UserCanSeeVipContent();
-            return Ok(MapToDto(tip, userCanSeeVip));
-        }
-
-        // GET /api/tips/history?days=30
-        // Past tips (match date before now) with their final result — for the "History" page.
-        [HttpGet("history")]
-        public async Task<ActionResult<IEnumerable<TipResponse>>> GetHistory([FromQuery] int days = 30)
-        {
-            var since = DateTime.UtcNow.AddDays(-days);
             var tips = await _db.Tips
-                .Where(t => t.IsPublished && t.MatchDate < DateTime.UtcNow && t.MatchDate >= since)
+                .Where(t => t.IsPublished)
                 .OrderByDescending(t => t.MatchDate)
+                .Take(50)
+                .Select(t => new
+                {
+                    t.Id,
+                    t.MatchDate,
+                    t.Odds,
+                    Result = t.Result.ToString(),
+                    t.IsVip,
+                    t.Analysis,
+                    HomeTeam = (t.IsVip && !isVipUser) ? "Locked VIP Match" : t.HomeTeam,
+                    AwayTeam = (t.IsVip && !isVipUser) ? "Locked" : t.AwayTeam,
+                    PredictionType = (t.IsVip && !isVipUser) ? "***" : t.PredictionType,
+                    League = (t.IsVip && !isVipUser) ? "VIP Only" : t.League
+                })
                 .ToListAsync();
 
-            var userCanSeeVip = UserCanSeeVipContent();
-            return Ok(tips.Select(t => MapToDto(t, userCanSeeVip)));
+            return Ok(tips);
         }
 
-        // ---------- Admin-only endpoints ----------
-
-        [Authorize(Roles = "Admin")]
-        [HttpPost]
-        public async Task<ActionResult<TipResponse>> CreateTip(CreateTipRequest request)
+        [HttpGet("tickets")]
+        public async Task<IActionResult> GetPublicTickets()
         {
-            var tip = new Tip
-            {
-                HomeTeam = request.HomeTeam,
-                AwayTeam = request.AwayTeam,
-                League = request.League,
-                MatchDate = request.MatchDate,
-                PredictionType = request.PredictionType,
-                Odds = request.Odds,
-                IsVip = request.IsVip,
-                Analysis = request.Analysis,
-                IsPublished = request.IsPublished,
-                Result = TipResult.Pending,
-                CreatedAt = DateTime.UtcNow
-            };
+            var tickets = await _db.TicketRecords
+                .Include(t => t.Legs)
+                .OrderByDescending(t => t.MatchDate)
+                .Select(t => new
+                {
+                    t.Id,
+                    t.ImageUrl,
+                    t.Description,
+                    t.TotalOdds,
+                    t.MatchDate,
+                    t.IsVip,
+                    Legs = t.Legs.OrderBy(l => l.SortOrder).Select(l => new
+                    {
+                        l.Id,
+                        l.League,
+                        l.MatchDate,
+                        l.HomeTeam,
+                        l.AwayTeam,
+                        l.Prediction,
+                        l.Odds
+                    })
+                })
+                .ToListAsync();
 
-            _db.Tips.Add(tip);
-            await _db.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetTip), new { id = tip.Id }, MapToDto(tip, true));
-        }
-
-        [Authorize(Roles = "Admin")]
-        [HttpPut("{id}")]
-        public async Task<ActionResult<TipResponse>> UpdateTip(int id, UpdateTipRequest request)
-        {
-            var tip = await _db.Tips.FindAsync(id);
-            if (tip == null)
-                return NotFound();
-
-            tip.HomeTeam = request.HomeTeam;
-            tip.AwayTeam = request.AwayTeam;
-            tip.League = request.League;
-            tip.MatchDate = request.MatchDate;
-            tip.PredictionType = request.PredictionType;
-            tip.Odds = request.Odds;
-            tip.IsVip = request.IsVip;
-            tip.Analysis = request.Analysis;
-            tip.IsPublished = request.IsPublished;
-
-            if (Enum.TryParse<TipResult>(request.Result, out var parsedResult))
-                tip.Result = parsedResult;
-
-            await _db.SaveChangesAsync();
-            return Ok(MapToDto(tip, true));
-        }
-
-        [Authorize(Roles = "Admin")]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTip(int id)
-        {
-            var tip = await _db.Tips.FindAsync(id);
-            if (tip == null)
-                return NotFound();
-
-            _db.Tips.Remove(tip);
-            await _db.SaveChangesAsync();
-            return NoContent();
-        }
-
-        // ---------- Helpers ----------
-
-        private bool UserCanSeeVipContent()
-        {
-            if (!User.Identity?.IsAuthenticated ?? true)
-                return false;
-
-            if (User.IsInRole("Admin"))
-                return true;
-
-            var isVipClaim = User.FindFirst("isVip")?.Value;
-            return isVipClaim == "true";
-        }
-
-        private static TipResponse MapToDto(Tip tip, bool userCanSeeVip)
-        {
-            var locked = tip.IsVip && !userCanSeeVip;
-
-            return new TipResponse
-            {
-                Id = tip.Id,
-                HomeTeam = tip.HomeTeam,
-                AwayTeam = tip.AwayTeam,
-                League = tip.League,
-                MatchDate = tip.MatchDate,
-                PredictionType = locked ? "🔒 VIP" : tip.PredictionType,
-                Odds = locked ? 0 : tip.Odds,
-                Result = tip.Result.ToString(),
-                IsVip = tip.IsVip,
-                Analysis = locked ? null : tip.Analysis,
-                IsPublished = tip.IsPublished,
-                CreatedAt = tip.CreatedAt
-            };
+            return Ok(tickets);
         }
     }
 }

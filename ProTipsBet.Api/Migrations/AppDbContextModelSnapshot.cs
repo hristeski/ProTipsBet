@@ -105,6 +105,45 @@ namespace ProTipsBet.Api.Migrations
                     b.ToTable("ContactMessages");
                 });
 
+            modelBuilder.Entity("ProTipsBet.Api.Models.DiscountCode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal?>("AmountOff")
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("MaxUses")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("PercentOff")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UsedCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DiscountCodes");
+                });
+
             modelBuilder.Entity("ProTipsBet.Api.Models.Payment", b =>
                 {
                     b.Property<int>("Id")
@@ -237,6 +276,85 @@ namespace ProTipsBet.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Tickets");
+                });
+
+            modelBuilder.Entity("ProTipsBet.Api.Models.TicketRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsVip")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("MatchDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("TotalOdds")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TicketRecords");
+                });
+
+            modelBuilder.Entity("ProTipsBet.Api.Models.TicketRecordLeg", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AwayTeam")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("HomeTeam")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("League")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("MatchDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("Odds")
+                        .HasColumnType("decimal(6,2)");
+
+                    b.Property<string>("Prediction")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TicketRecordId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TicketRecordId");
+
+                    b.ToTable("TicketRecordLegs");
                 });
 
             modelBuilder.Entity("ProTipsBet.Api.Models.TicketTip", b =>
@@ -383,6 +501,17 @@ namespace ProTipsBet.Api.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("ProTipsBet.Api.Models.TicketRecordLeg", b =>
+                {
+                    b.HasOne("ProTipsBet.Api.Models.TicketRecord", "TicketRecord")
+                        .WithMany("Legs")
+                        .HasForeignKey("TicketRecordId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TicketRecord");
+                });
+
             modelBuilder.Entity("ProTipsBet.Api.Models.TicketTip", b =>
                 {
                     b.HasOne("ProTipsBet.Api.Models.Ticket", "Ticket")
@@ -410,6 +539,11 @@ namespace ProTipsBet.Api.Migrations
             modelBuilder.Entity("ProTipsBet.Api.Models.Ticket", b =>
                 {
                     b.Navigation("TicketTips");
+                });
+
+            modelBuilder.Entity("ProTipsBet.Api.Models.TicketRecord", b =>
+                {
+                    b.Navigation("Legs");
                 });
 
             modelBuilder.Entity("ProTipsBet.Api.Models.Tip", b =>

@@ -27,16 +27,13 @@ namespace ProTipsBet.Api.Controllers
         [HttpPost("submit")]
         public async Task<IActionResult> SubmitPayment([FromForm] SubmitPaymentRequest request)
         {
-            // ---------- Validate plan ----------
             var plan = PlanCatalog.FindByFrontendId(request.PlanId);
             if (plan == null)
                 return BadRequest(new { message = $"Invalid plan: '{request.PlanId}'. Valid options: daily, weekly, monthly." });
 
-            // ---------- Validate payment method ----------
             if (!PaymentMethodMapper.TryParse(request.PaymentMethod, out var paymentMethod))
                 return BadRequest(new { message = $"Invalid payment method: '{request.PaymentMethod}'." });
 
-            // ---------- Validate proof (required for manual methods, crypto may not need it yet) ----------
             if (request.Proof == null || request.Proof.Length == 0)
                 return BadRequest(new { message = "Proof of payment is required." });
 
@@ -44,11 +41,17 @@ namespace ProTipsBet.Api.Controllers
             if (string.IsNullOrWhiteSpace(emailNormalized) || string.IsNullOrWhiteSpace(request.Password))
                 return BadRequest(new { message = "Email and password are required." });
 
+            // ---------- Apply discount code (if any) ----------
+            var discountResult = await DiscountCalculator.CheckAsync(_db, request.DiscountCode, plan.Price);
+            if (!string.IsNullOrWhiteSpace(request.DiscountCode) && !discountResult.Valid)
+                return BadRequest(new { message = discountResult.Message ?? "Invalid discount code." });
+
+            var finalPrice = discountResult.FinalPrice;
+
             var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == emailNormalized);
 
             if (user == null)
             {
-                // New user — create account
                 user = new User
                 {
                     Email = emailNormalized,
@@ -63,9 +66,6 @@ namespace ProTipsBet.Api.Controllers
             }
             else
             {
-                // Existing user — MUST verify password before attaching a payment to their account.
-                // Without this check, anyone who knows a user's email could submit fake payments
-                // under that account.
                 if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                     return Unauthorized(new { message = "An account with this email already exists. Incorrect password." });
 
@@ -73,7 +73,6 @@ namespace ProTipsBet.Api.Controllers
                     return Unauthorized(new { message = "This account has been deactivated." });
             }
 
-            // ---------- Save proof file ----------
             var uploadsFolder = Path.Combine(_env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "uploads", "receipts");
             if (!Directory.Exists(uploadsFolder))
                 Directory.CreateDirectory(uploadsFolder);
@@ -88,44 +87,47 @@ namespace ProTipsBet.Api.Controllers
 
             var receiptUrl = $"/uploads/receipts/{uniqueFileName}";
 
-            // ---------- Create pending subscription ----------
             var now = DateTime.UtcNow;
             var subscription = new Subscription
             {
                 UserId = user.Id,
                 PlanType = plan.PlanType,
-                Price = plan.Price,
+                Price = finalPrice, // discounted price, not the sticker price
                 Currency = plan.Currency,
                 StartDate = now,
-                EndDate = now.AddDays(plan.DurationDays), // will be recalculated from approval date when admin confirms
+                EndDate = now.AddDays(plan.DurationDays),
                 Status = SubscriptionStatus.PendingPayment,
                 CreatedAt = now
             };
             _db.Subscriptions.Add(subscription);
             await _db.SaveChangesAsync();
 
-            // ---------- Create pending payment ----------
             var payment = new Payment
             {
                 UserId = user.Id,
                 SubscriptionId = subscription.Id,
                 Method = paymentMethod,
-                Amount = plan.Price,
+                Amount = finalPrice,
                 Currency = plan.Currency,
                 Status = PaymentStatus.Pending,
                 ReceiptUrl = receiptUrl,
                 CreatedAt = now
             };
             _db.Payments.Add(payment);
+
+            // Mark the discount code as used (locked in at submission time)
+            if (discountResult.Code != null)
+                discountResult.Code.UsedCount += 1;
+
             await _db.SaveChangesAsync();
 
-            // ---------- Notify user by email (best-effort, don't fail the request if email fails) ----------
             try
             {
                 var emailBody = $@"
                     <h3>Payment Received</h3>
                     <p>Hello,</p>
-                    <p>We have received your payment proof for the {plan.Name} plan via {request.PaymentMethod}.</p>
+                    <p>We have received your payment proof for the {plan.Name} plan via {request.PaymentMethod}
+                    {(discountResult.Code != null ? $" (discount code <strong>{discountResult.Code.Code}</strong> applied — total: {finalPrice} {plan.Currency})" : "")}.</p>
                     <p>Our team is currently reviewing it. You will receive another email once your VIP access is activated.</p>
                     <p>Thank you,<br/>ProTipsBet Team</p>";
 
@@ -136,7 +138,6 @@ namespace ProTipsBet.Api.Controllers
                 // Email failures should not block the payment submission itself.
             }
 
-            // ---------- Log the user in immediately so the frontend can redirect to a logged-in state ----------
             var (token, expiresAt) = _tokenService.GenerateToken(user);
 
             return Ok(new
@@ -145,7 +146,8 @@ namespace ProTipsBet.Api.Controllers
                 token,
                 expiresAt,
                 subscriptionId = subscription.Id,
-                paymentId = payment.Id
+                paymentId = payment.Id,
+                finalPrice
             });
         }
     }
