@@ -464,6 +464,10 @@ namespace ProTipsBet.Api.Migrations
                     b.Property<DateTime?>("VipExpiresAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("WhatsApp")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
