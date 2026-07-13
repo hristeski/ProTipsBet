@@ -30,7 +30,7 @@ namespace ProTipsBet.Api.Controllers
 
             var exists = await _db.Users.AnyAsync(u => u.Email == emailNormalized);
             if (exists)
-                return Conflict(new { message = "There's already an account with this email" });
+                return Conflict(new { message = "Веќе постои корисник со овој email." });
 
             var user = new User
             {
@@ -73,10 +73,10 @@ namespace ProTipsBet.Api.Controllers
             var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == emailNormalized);
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-                    return Unauthorized(new { message = "Invalid email or password." });
+                return Unauthorized(new { message = "Погрешен email или лозинка." });
 
             if (!user.IsActive)
-                return Unauthorized(new { message = "This account is deactivated." });
+                return Unauthorized(new { message = "Оваа сметка е деактивирана." });
 
             var (token, expiresAt) = _tokenService.GenerateToken(user);
 

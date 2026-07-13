@@ -59,8 +59,8 @@ export default function NotificationToast() {
   const Icon = msg.icon;
 
   return (
-    // ПРОМЕНАТА Е ТУКА: top-1/3 за мобилен, md:top-24 за десктоп
-    <div className="fixed top-2/18 md:top-24 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-sm">
+    // ГЛАВНАТА ПРОМЕНА Е ТУКА ВО КЛАСИТЕ: bottom-6 за мобилен, md:bottom-[20px] md:top-24 за десктоп
+    <div className="fixed bottom-6 md:bottom-[100px] md:top-24 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-sm">
       <div
         key={index}
         className={`toast-in flex items-center gap-3 rounded-2xl border px-4 py-3 backdrop-blur-xl bg-zinc-900/95 shadow-xl shadow-black/40 ${msg.accent}`}

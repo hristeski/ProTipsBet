@@ -12,23 +12,23 @@ interface ToastMessage {
   accent: string;
 }
 
-// Поагресивни и поубедливи маркетиншки пораки
+// Edit messages here - easy to add a new campaign/match
 const MESSAGES: ToastMessage[] = [
   {
-    icon: Trophy,
-    text: "🔥 Don't miss out! Today's VIP & Free tips are LIVE. Secure your profit!",
-    href: "/vip-tips",
-    accent: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-  },
-  {
     icon: Percent,
-    text: "⚡ Flash Promo: Get 20% OFF the Monthly VIP pass today only!",
+    text: "-20% on Monthly Pro today only",
     href: "/vip-tips",
     accent: "text-amber-400 bg-amber-500/10 border-amber-500/20",
   },
   {
+    icon: Trophy,
+    text: "New VIP ticket: Real Madrid vs Bayern, 21:00",
+    href: "/vip-tips",
+    accent: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+  },
+  {
     icon: MessageCircle,
-    text: "💬 Want to win big? Join our Telegram group for exclusive live picks!",
+    text: "Got a question? Reach us on Telegram",
     href: "/contact",
     accent: "text-sky-400 bg-sky-500/10 border-sky-500/20",
   },
@@ -59,8 +59,7 @@ export default function NotificationToast() {
   const Icon = msg.icon;
 
   return (
-    // ПРОМЕНАТА Е ТУКА: top-1/3 за мобилен, md:top-24 за десктоп
-    <div className="fixed top-2/18 md:top-24 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-sm">
+    <div className="fixed top-4 md:top-24 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-sm">
       <div
         key={index}
         className={`toast-in flex items-center gap-3 rounded-2xl border px-4 py-3 backdrop-blur-xl bg-zinc-900/95 shadow-xl shadow-black/40 ${msg.accent}`}
@@ -76,9 +75,9 @@ export default function NotificationToast() {
             sessionStorage.setItem(DISMISS_KEY, "1");
           }}
           aria-label="Dismiss notification"
-          className="shrink-0 text-zinc-400 hover:text-white transition-colors p-1"
+          className="shrink-0 text-zinc-500 hover:text-white transition-colors"
         >
-          <X size={18} />
+          <X size={16} />
         </button>
       </div>
     </div>
