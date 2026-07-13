@@ -77,7 +77,7 @@ export default function Navbar() {
           ))}
 
           <Link
-            href={isLoggedIn ? "/admin/tips" : "/login"}
+            href={isLoggedIn ? "/admin/tips" : "/admin/login"}
             className={`text-sm font-bold transition-colors flex items-center gap-1.5 px-3 py-1.5 rounded-lg border ${
               pathname.includes("/admin") 
                 ? "bg-zinc-800 border-zinc-700 text-white" 

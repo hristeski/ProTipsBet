@@ -132,3 +132,6 @@ C:\protipsbet\protipsbet.api\obj\Debug\net9.0\ProTipsBet.Api.genruntimeconfig.ca
 C:\protipsbet\protipsbet.api\obj\Debug\net9.0\ref\ProTipsBet.Api.dll
 C:\protipsbet\ProTipsBet.Api\obj\Debug\net9.0\ProTipsBet.Api.sourcelink.json
 C:\protipsbet\ProTipsBet.Api\bin\Debug\net9.0\ProTipsBet.Api.staticwebassets.runtime.json
+C:\protipsbet\ProTipsBet.Api\bin\Debug\net9.0\BouncyCastle.Cryptography.dll
+C:\protipsbet\ProTipsBet.Api\bin\Debug\net9.0\MailKit.dll
+C:\protipsbet\ProTipsBet.Api\bin\Debug\net9.0\MimeKit.dll
