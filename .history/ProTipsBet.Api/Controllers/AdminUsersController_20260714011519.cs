@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProTipsBet.Api.Data;
+using ProTipsBet.Api.Models;
 
 namespace ProTipsBet.Api.Controllers
 {
@@ -13,7 +14,6 @@ namespace ProTipsBet.Api.Controllers
         private readonly AppDbContext _db;
         public AdminUsersController(AppDbContext db) => _db = db;
 
-        // GET /api/admin/users — list every user with VIP status + payment summary
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
@@ -24,17 +24,17 @@ namespace ProTipsBet.Api.Controllers
                     u.Id,
                     u.Email,
                     u.FullName,
-                    u.WhatsApp,
+                    u.PhoneNumber,
                     Role = u.Role.ToString(),
                     u.IsVip,
                     u.VipExpiresAt,
                     u.IsActive,
                     u.CreatedAt,
                     TotalPaid = u.Payments
-                        .Where(p => p.Status == Models.PaymentStatus.Confirmed)
+                        .Where(p => p.Status == PaymentStatus.Confirmed)
                         .Sum(p => (decimal?)p.Amount) ?? 0,
-                    ConfirmedPaymentsCount = u.Payments.Count(p => p.Status == Models.PaymentStatus.Confirmed),
-                    PendingPaymentsCount = u.Payments.Count(p => p.Status == Models.PaymentStatus.Pending),
+                    ConfirmedPaymentsCount = u.Payments.Count(p => p.Status == PaymentStatus.Confirmed),
+                    PendingPaymentsCount = u.Payments.Count(p => p.Status == PaymentStatus.Pending),
                     LastPaymentDate = u.Payments
                         .OrderByDescending(p => p.CreatedAt)
                         .Select(p => (DateTime?)p.CreatedAt)
@@ -45,7 +45,6 @@ namespace ProTipsBet.Api.Controllers
             return Ok(users);
         }
 
-        // GET /api/admin/users/5 — one user's full payment + subscription history
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserDetail(int id)
         {
@@ -88,7 +87,7 @@ namespace ProTipsBet.Api.Controllers
                 user.Id,
                 user.Email,
                 user.FullName,
-                user.WhatsApp,
+                user.PhoneNumber,
                 Role = user.Role.ToString(),
                 user.IsVip,
                 user.VipExpiresAt,
@@ -99,7 +98,6 @@ namespace ProTipsBet.Api.Controllers
             });
         }
 
-        // PUT /api/admin/users/5/toggle-active — suspend/reactivate an account
         [HttpPut("{id}/toggle-active")]
         public async Task<IActionResult> ToggleActive(int id)
         {
@@ -112,53 +110,84 @@ namespace ProTipsBet.Api.Controllers
             return Ok(new { user.Id, user.IsActive });
         }
 
-        // PUT /api/admin/users/5/vip — manually grant/extend/revoke VIP without a payment
-        // Body: { "days": 30 } to grant/extend, or { "days": 0 } to revoke immediately.
+        // Manually grant or revoke VIP access — useful for comps, corrections, or manual crypto payments
         [HttpPut("{id}/vip")]
         public async Task<IActionResult> SetVip(int id, [FromBody] SetVipRequest request)
         {
             var user = await _db.Users.FindAsync(id);
             if (user == null) return NotFound();
 
-            if (request.Days <= 0)
+            if (request.Grant)
             {
-                user.IsVip = false;
-                user.VipExpiresAt = null;
+                user.IsVip = true;
+                user.VipExpiresAt = DateTime.UtcNow.AddDays(request.Days ?? 30);
             }
             else
             {
-                // Extends from "now" or from the current expiry if it's still in the
-                // future (so re-granting a still-active VIP stacks days on top,
-                // rather than shortening their remaining time).
-                var baseDate = user.VipExpiresAt.HasValue && user.VipExpiresAt.Value > DateTime.UtcNow
-                    ? user.VipExpiresAt.Value
-                    : DateTime.UtcNow;
-
-                user.IsVip = true;
-                user.VipExpiresAt = baseDate.AddDays(request.Days);
+                user.IsVip = false;
+                user.VipExpiresAt = null;
             }
 
             await _db.SaveChangesAsync();
             return Ok(new { user.Id, user.IsVip, user.VipExpiresAt });
         }
 
-        // DELETE /api/admin/users/5 — only allowed for users with zero payment
-        // history (accidental/spam signups). Anyone who ever paid keeps their
-        // record for accounting purposes; suspend them via toggle-active instead.
+        // Promote to Admin or demote back to regular User
+        [HttpPut("{id}/role")]
+        public async Task<IActionResult> ChangeRole(int id, [FromBody] ChangeRoleRequest request)
+        {
+            var user = await _db.Users.FindAsync(id);
+            if (user == null) return NotFound();
+
+            if (!Enum.TryParse<UserRole>(request.Role, true, out var newRole))
+                return BadRequest(new { message = "Role must be 'User' or 'Admin'." });
+
+            // Guard: don't let the last admin demote themselves into a locked-out state
+            var callerIdClaim = User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
+            if (int.TryParse(callerIdClaim, out var callerId) && callerId == id && newRole != UserRole.Admin)
+            {
+                var otherAdmins = await _db.Users.CountAsync(u => u.Role == UserRole.Admin && u.Id != id);
+                if (otherAdmins == 0)
+                    return BadRequest(new { message = "You can't remove your own admin access — you're the only admin left." });
+            }
+
+            user.Role = newRole;
+            await _db.SaveChangesAsync();
+            return Ok(new { user.Id, Role = user.Role.ToString() });
+        }
+
+        // Admin sets a new password directly (e.g. customer lost access and can't reset themselves yet)
+        [HttpPut("{id}/reset-password")]
+        public async Task<IActionResult> ResetPassword(int id, [FromBody] ResetPasswordRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 8)
+                return BadRequest(new { message = "New password must be at least 8 characters." });
+
+            var user = await _db.Users.FindAsync(id);
+            if (user == null) return NotFound();
+
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+            await _db.SaveChangesAsync();
+
+            return Ok(new { message = "Password updated." });
+        }
+
+        // Hard delete — only allowed for accounts with no payment/subscription history,
+        // to protect financial audit trail. Everyone else should be deactivated instead.
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
             var user = await _db.Users.FindAsync(id);
             if (user == null) return NotFound();
 
-            var hasPaymentHistory = await _db.Payments.AnyAsync(p => p.UserId == id)
-                                     || await _db.Subscriptions.AnyAsync(s => s.UserId == id);
+            var hasHistory = await _db.Payments.AnyAsync(p => p.UserId == id)
+                           || await _db.Subscriptions.AnyAsync(s => s.UserId == id);
 
-            if (hasPaymentHistory)
+            if (hasHistory)
             {
                 return BadRequest(new
                 {
-                    message = "This user has payment or subscription history and can't be deleted. Suspend the account instead to preserve financial records."
+                    message = "This user has payment or subscription history and can't be permanently deleted. Deactivate the account instead to preserve records."
                 });
             }
 
@@ -171,6 +200,17 @@ namespace ProTipsBet.Api.Controllers
 
     public class SetVipRequest
     {
-        public int Days { get; set; }
+        public bool Grant { get; set; }
+        public int? Days { get; set; } // used only when Grant = true; defaults to 30
+    }
+
+    public class ChangeRoleRequest
+    {
+        public string Role { get; set; } = "User";
+    }
+
+    public class ResetPasswordRequest
+    {
+        public string NewPassword { get; set; } = string.Empty;
     }
 }
