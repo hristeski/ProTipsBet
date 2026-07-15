@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ProTipsBet.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+66184d017ed90fe4346976488b0aa99f44680e6b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3ae468f8409063623d34f396d25b3c96c071bac2")]
 [assembly: System.Reflection.AssemblyProductAttribute("ProTipsBet.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ProTipsBet.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
