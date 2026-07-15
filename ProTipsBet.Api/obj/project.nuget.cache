@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "2X1Y1EQM+9E=",
+  "dgSpecHash": "mRE192XyRNo=",
   "success": true,
-  "projectFilePath": "C:\\protipsbet\\ProTipsBet.Api\\ProTipsBet.Api.csproj",
+  "projectFilePath": "C:\\protipsbet\\protipsbet.api\\ProTipsBet.Api.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\&&^\\.nuget\\packages\\bcrypt.net-next\\4.2.0\\bcrypt.net-next.4.2.0.nupkg.sha512",
     "C:\\Users\\&&^\\.nuget\\packages\\bouncycastle.cryptography\\2.6.2\\bouncycastle.cryptography.2.6.2.nupkg.sha512",
