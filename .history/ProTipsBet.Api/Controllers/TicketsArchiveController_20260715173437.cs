@@ -23,16 +23,13 @@ namespace ProTipsBet.Api.Controllers
             _env = env;
         }
 
-       [HttpGet]
-[AllowAnonymous] // <--- ОВА ЈА ПУШТА ЈАВНАТА СТРАНА ДА ГИ ВИДИ ТИКЕТИТЕ!
-public async Task<IActionResult> GetAllTickets()
-{
-    var tickets = await _db.TicketRecords
-        .Include(t => t.Legs)
-        .OrderByDescending(t => t.MatchDate)
-        .ToListAsync();
-    return Ok(tickets);
-}
+        [HttpGet]
+        public async Task<IActionResult> GetAllTickets()
+        {
+            // Додадено Include за да ги влече и натпреварите
+            var tickets = await _db.TicketRecords.Include(t => t.Legs).OrderByDescending(t => t.MatchDate).ToListAsync();
+            return Ok(tickets);
+        }
 
         [HttpPost]
 public async Task<IActionResult> UploadTicket([FromForm] UploadTicketRequest request)
