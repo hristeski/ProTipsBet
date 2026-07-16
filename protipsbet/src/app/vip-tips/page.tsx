@@ -9,7 +9,7 @@ import PricingPlans from "@/components/PricingPlans";
 import { VIP_BANNERS } from "@/lib/banners";
 import { CRYPTO_MIN_NOTE } from "@/lib/pricing";
 
-const API_BASE = "http://localhost:5103";
+import { API_BASE } from "@/lib/api";
 
 export default function VipTipsPage() {
   const [vipMatches, setVipMatches] = useState<any[]>([]);

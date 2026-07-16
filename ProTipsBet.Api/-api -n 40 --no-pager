@@ -1,0 +1,19 @@
+[0;1;32m●[0m protips-api.service - ProTipsBet API Service
+     Loaded: loaded (]8;;file://srv1790985/etc/systemd/system/protips-api.service/etc/systemd/system/protips-api.service]8;;; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+     Active: [0;1;32mactive (running)[0m since Thu 2026-07-16 00:37:25 UTC; 18s ago
+   Main PID: 61937 (dotnet)
+      Tasks: 16 (limit: 4652)
+     Memory: 25.1M (peak: 25.3M)
+        CPU: 343ms
+     CGroup: /system.slice/protips-api.service
+             └─[0;38;5;245m61937 /usr/bin/dotnet /var/www/protips-api/ProTipsBet.Api.dll[0m
+
+Jul 16 00:37:25 srv1790985 systemd[1]: Started protips-api.service - ProTipsBet API Service.
+Jul 16 00:37:26 srv1790985 protips-api[61937]: info: Microsoft.Hosting.Lifetime[14]
+Jul 16 00:37:26 srv1790985 protips-api[61937]:       Now listening on: http://127.0.0.1:5103
+Jul 16 00:37:26 srv1790985 protips-api[61937]: info: Microsoft.Hosting.Lifetime[0]
+Jul 16 00:37:26 srv1790985 protips-api[61937]:       Application started. Press Ctrl+C to shut down.
+Jul 16 00:37:26 srv1790985 protips-api[61937]: info: Microsoft.Hosting.Lifetime[0]
+Jul 16 00:37:26 srv1790985 protips-api[61937]:       Hosting environment: Production
+Jul 16 00:37:26 srv1790985 protips-api[61937]: info: Microsoft.Hosting.Lifetime[0]
+Jul 16 00:37:26 srv1790985 protips-api[61937]:       Content root path: /var/www/protips-api

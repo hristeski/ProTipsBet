@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, Crown, ShieldAlert, ShieldCheck, Search } from "lucide-react";
 
-const API_BASE = "http://localhost:5103";
+import { API_BASE } from "@/lib/api";
 
 type AdminUser = {
   id: number;

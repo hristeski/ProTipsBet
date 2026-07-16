@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Trash2, Loader2, X, Power, Tag } from "lucide-react";
 
-const API_BASE = "http://localhost:5103";
+import { API_BASE } from "@/lib/api";
 
 type Discount = {
   id: number;

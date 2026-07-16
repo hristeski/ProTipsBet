@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Plus, XCircle, CheckCircle2, Loader2, X, Trash2 } from "lucide-react";
-import { authHeaders } from "@/lib/api";
-const API_BASE = "http://localhost:5103";
+import { API_BASE, authHeaders } from "@/lib/api";
 
 type Tip = {
   id: number;

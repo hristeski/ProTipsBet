@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace ProTipsBet.Api.Models
 {
@@ -10,6 +11,7 @@ namespace ProTipsBet.Api.Models
         public int Id { get; set; }
 
         public int TicketRecordId { get; set; }
+        [JsonIgnore]
         public TicketRecord TicketRecord { get; set; } = null!;
 
         [MaxLength(100)]
