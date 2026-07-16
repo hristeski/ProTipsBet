@@ -8,15 +8,12 @@ export type PaymentMethodId =
   | "paypal"
   | "mpesa_global";
 
-export type InstructionRow = { label: string; value: string; showQr?: boolean };
-
 export interface PaymentMethod {
   id: PaymentMethodId;
   name: string;
   instant: boolean; // true = automated/instant, false = manual review
-  contactOnly?: boolean;
   // Details shown to the client once they pick this method (manual methods only)
-  instructions?: InstructionRow[];
+  instructions?: { label: string; value: string }[];
 }
 
 export const PAYMENT_METHODS: PaymentMethod[] = [
@@ -25,22 +22,30 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
     name: "Crypto (USDT/BTC)",
     instant: false,
     instructions: [
-      { label: "USDT (TRC20)", value: "TECiSP7aaactgEXcqyrwFAcc85vfG6k81S", showQr: true },
-      { label: "USDT (BEP20)", value: "0x0fa04bccde3b11e8d0e3eb7ea7332f712c2e6dc2", showQr: true },
-      { label: "BTC", value: "1FFYFfafG6roADdomQeeBeT7KDCGkD8288", showQr: true },
+      { label: "USDT (TRC20)", value: "TXXXXXXXXXXXXXXXXXXXXXXXXXXXX" },
+      { label: "USDT (BEP20)", value: "0xXXXXXXXXXXXXXXXXXXXXXXXXXXXX" },
+      { label: "BTC", value: "bc1qXXXXXXXXXXXXXXXXXXXXXXXXXXXX" },
     ],
   },
   {
     id: "western_union",
     name: "Western Union",
     instant: false,
-    contactOnly: true,
+    instructions: [
+      { label: "Receiver Name", value: "PROTIPSBET LTD" },
+      { label: "Country", value: "United Kingdom" },
+      { label: "Reference / Note", value: "Include your email in the transfer note" },
+    ],
   },
   {
     id: "ria",
     name: "Ria Money Transfer",
     instant: false,
-    contactOnly: true,
+    instructions: [
+      { label: "Receiver Name", value: "PROTIPSBET LTD" },
+      { label: "Country", value: "United Kingdom" },
+      { label: "Reference / Note", value: "Include your email in the transfer note" },
+    ],
   },
   {
     id: "skrill",
@@ -67,11 +72,6 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
     id: "mpesa_global",
     name: "MPesa Global",
     instant: false,
-    contactOnly: true,
+    instructions: [{ label: "MPesa Number", value: "+1234567890" }],
   },
 ];
-
-export const CONTACT_INFO = {
-  whatsapp: "https://wa.me/38978231801",
-  email: "support@protipsbet.com",
-};

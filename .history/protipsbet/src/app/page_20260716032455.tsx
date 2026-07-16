@@ -140,22 +140,21 @@ export default function Home() {
             No free picks published yet today — check back soon.
           </div>
         ) : (
-          <div className="flex flex-wrap justify-center gap-4">
-  {freeTips.map((tip) => (
-    <div key={tip.id} className="w-full md:w-[calc(50%-0.5rem)]">
-      <TipCard
-        league={tip.league && tip.league !== "Unknown" ? tip.league : "Football"}
-        matchTime={formatMatchTime(tip.matchDate)}
-        homeTeam={tip.homeTeam}
-        awayTeam={tip.awayTeam}
-        prediction={tip.predictionType || "No prediction"}
-        odds={Number(tip.odds) || 0}
-        status={getTipStatus(tip.result)}
-        isVip={false}
-      />
-    </div>
-  ))}
-</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {freeTips.map((tip) => (
+              <TipCard
+                key={tip.id}
+                league={tip.league && tip.league !== "Unknown" ? tip.league : "Football"}
+                matchTime={formatMatchTime(tip.matchDate)}
+                homeTeam={tip.homeTeam}
+                awayTeam={tip.awayTeam}
+                prediction={tip.predictionType || "No prediction"}
+                odds={Number(tip.odds) || 0}
+                status={getTipStatus(tip.result)}
+                isVip={false}
+              />
+            ))}
+          </div>
         )}
 
         <div className="text-center mt-8">

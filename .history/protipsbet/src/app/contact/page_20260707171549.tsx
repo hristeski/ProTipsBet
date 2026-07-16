@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, MessageSquare, Send, CheckCircle2, ShieldQuestion, Phone } from "lucide-react";
+import { Mail, MessageSquare, Send, CheckCircle2, ShieldQuestion } from "lucide-react";
 
 export default function ContactPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -27,8 +27,6 @@ export default function ContactPage() {
         
         {/* CONTACT INFO CARDS */}
         <div className="md:col-span-1 space-y-4">
-          
-          {/* Telegram Card */}
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 flex flex-col items-center text-center">
             <div className="bg-[#0088cc]/10 p-3 rounded-full text-[#0088cc] mb-4">
               <MessageSquare size={24} />
@@ -45,24 +43,6 @@ export default function ContactPage() {
             </a>
           </div>
 
-          {/* WhatsApp Card */}
-          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 flex flex-col items-center text-center">
-            <div className="bg-[#25D366]/10 p-3 rounded-full text-[#25D366] mb-4">
-              <Phone size={24} />
-            </div>
-            <h3 className="text-white font-bold mb-1">WhatsApp</h3>
-            <p className="text-zinc-400 text-sm mb-4">Chat with us directly.</p>
-            <a 
-              href="https://wa.me/38978231801" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-[#25D366] text-sm font-bold hover:underline"
-            >
-              +389 78 231 801
-            </a>
-          </div>
-
-          {/* Email Card */}
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 flex flex-col items-center text-center">
             <div className="bg-emerald-500/10 p-3 rounded-full text-emerald-400 mb-4">
               <Mail size={24} />
@@ -76,11 +56,19 @@ export default function ContactPage() {
               support@protipsbet.com
             </a>
           </div>
+
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 flex flex-col items-center text-center">
+            <div className="bg-amber-500/10 p-3 rounded-full text-amber-400 mb-4">
+              <ShieldQuestion size={24} />
+            </div>
+            <h3 className="text-white font-bold mb-1">FAQ</h3>
+            <p className="text-zinc-400 text-sm">Check our frequently asked questions for quick answers.</p>
+          </div>
         </div>
 
         {/* CONTACT FORM */}
         <div className="md:col-span-2">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 md:p-8 h-full">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 md:p-8">
             {isSubmitted ? (
               <div className="h-full min-h-[300px] flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-300">
                 <CheckCircle2 size={64} className="text-emerald-400 mb-4" />
@@ -148,29 +136,8 @@ export default function ContactPage() {
             )}
           </div>
         </div>
-      </div>
 
-      {/* FAQ SECTION BANNER */}
-      <div className="mt-8 bg-zinc-900/40 border border-zinc-800 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
-        <div className="flex flex-col md:flex-row items-center gap-6">
-          <div className="bg-amber-500/10 p-4 rounded-full text-amber-400">
-            <ShieldQuestion size={32} />
-          </div>
-          <div>
-            <h3 className="text-xl text-white font-bold mb-2">Have a quick question?</h3>
-            <p className="text-zinc-400 text-sm max-w-lg">
-              Check our frequently asked questions section for quick answers before sending a message. We might have already answered your question!
-            </p>
-          </div>
-        </div>
-        <a
-          href="/#faq"
-          className="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl transition-colors whitespace-nowrap"
-        >
-          View FAQ
-        </a>
       </div>
-
     </div>
   );
 }

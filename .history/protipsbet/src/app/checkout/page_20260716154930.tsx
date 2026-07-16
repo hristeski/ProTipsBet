@@ -282,7 +282,7 @@ import Link from "next/link";
 import { ArrowLeft, CheckCircle2, Bitcoin, Upload, Clock, Mail, Loader2, User, Phone } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { PRICING_PLANS, CRYPTO_MIN_NOTE } from "@/lib/pricing";
-import { CONTACT_INFO, PAYMENT_METHODS, type PaymentMethodId } from "@/lib/payment-methods";
+import { PAYMENT_METHODS, type PaymentMethodId } from "@/lib/payment-methods";
 import { API_BASE } from "@/lib/api";
 
 type Step = "method" | "crypto" | "manual-details" | "manual-account" | "pending";
@@ -445,63 +445,28 @@ function CheckoutContent() {
       {step === "manual-details" && method && (
         <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">
           <h3 className="font-bold text-white mb-1">{method.name}</h3>
-
-          {method.contactOnly ? (
-            <>
-              <p className="text-sm text-neutral-400 mb-5">
-                Payment details for <strong className="text-white">{method.name}</strong> are shared
-                directly to keep them private. Contact us and we'll send you the account info for
-                your <strong className="text-white">€{plan.price}</strong> payment.
-              </p>
-              <div className="flex flex-col gap-3">
-                <a
-                  href={CONTACT_INFO.whatsapp}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-4 bg-emerald-500 text-neutral-950 font-black rounded-xl text-center hover:scale-[1.02] transition-transform"
-                >
-                  Contact us on WhatsApp
-                </a>
-                <a
-                  href={`mailto:${CONTACT_INFO.email}?subject=${encodeURIComponent(
-                    `${method.name} payment - ${plan.name}`
-                  )}`}
-                  className="w-full py-3.5 bg-neutral-800 text-white font-bold rounded-xl text-center hover:bg-neutral-700 transition-colors"
-                >
-                  Email us instead
-                </a>
-              </div>
-              <p className="text-xs text-neutral-500 mt-4 text-center">
-                Once you've sent the payment, come back here to submit your proof and create your account.
-              </p>
-              <button
-                onClick={() => setStep("manual-account")}
-                className="w-full py-3 mt-4 border border-neutral-700 text-neutral-300 font-bold rounded-xl hover:bg-neutral-800 transition-colors text-sm"
-              >
-                I've Sent the Payment — Continue
-              </button>
-            </>
-          ) : (
-            <>
-              <p className="text-sm text-neutral-400 mb-5">
-                Send exactly <strong className="text-white">€{plan.price}</strong> using the details below.
-              </p>
-              <div className="bg-neutral-950 p-4 rounded-xl mb-6 space-y-3">
-                {method.instructions?.map((row) => (
-                  <div key={row.label}>
-                    <p className="text-xs text-neutral-500 mb-1">{row.label}:</p>
-                    <p className="font-mono text-sm text-white select-all">{row.value}</p>
+          <p className="text-sm text-neutral-400 mb-5">
+            Send exactly <strong className="text-white">€{plan.price}</strong> using the details below.
+          </p>
+          <div className="bg-neutral-950 p-4 rounded-xl mb-6 space-y-3">
+            {method.instructions?.map((row) => (
+              <div key={row.label} className="mb-3">
+                <p className="text-xs text-neutral-500 mb-1">{row.label}:</p>
+                <p className="font-mono text-sm text-white select-all mb-2">{row.value}</p>
+                {row.showQr && (
+                  <div className="bg-white p-3 rounded-lg w-fit">
+                    <QRCodeSVG value={row.value} size={140} />
                   </div>
-                ))}
+                )}
               </div>
-              <button
-                onClick={() => setStep("manual-account")}
-                className="w-full py-4 bg-white text-neutral-950 font-black rounded-xl hover:bg-neutral-200 transition-colors"
-              >
-                I've Sent the Payment
-              </button>
-            </>
-          )}
+            ))}
+          </div>
+          <button
+            onClick={() => setStep("manual-account")}
+            className="w-full py-4 bg-white text-neutral-950 font-black rounded-xl hover:bg-neutral-200 transition-colors"
+          >
+            I've Sent the Payment
+          </button>
         </div>
       )}
 
@@ -547,7 +512,7 @@ function CheckoutContent() {
               required
               value={whatsapp}
               onChange={(e) => setWhatsapp(e.target.value)}
-              placeholder="+389 78 231 801"
+              placeholder="+389 70 000 000"
               className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-emerald-500 text-white transition-colors"
             />
           </div>

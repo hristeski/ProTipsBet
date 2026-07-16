@@ -14,7 +14,6 @@ export interface PaymentMethod {
   id: PaymentMethodId;
   name: string;
   instant: boolean; // true = automated/instant, false = manual review
-  contactOnly?: boolean;
   // Details shown to the client once they pick this method (manual methods only)
   instructions?: InstructionRow[];
 }
@@ -34,13 +33,21 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
     id: "western_union",
     name: "Western Union",
     instant: false,
-    contactOnly: true,
+    instructions: [
+      { label: "Receiver Name", value: "PROTIPSBET LTD" },
+      { label: "Country", value: "United Kingdom" },
+      { label: "Reference / Note", value: "Include your email in the transfer note" },
+    ],
   },
   {
     id: "ria",
     name: "Ria Money Transfer",
     instant: false,
-    contactOnly: true,
+    instructions: [
+      { label: "Receiver Name", value: "PROTIPSBET LTD" },
+      { label: "Country", value: "United Kingdom" },
+      { label: "Reference / Note", value: "Include your email in the transfer note" },
+    ],
   },
   {
     id: "skrill",
@@ -67,11 +74,6 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
     id: "mpesa_global",
     name: "MPesa Global",
     instant: false,
-    contactOnly: true,
+    instructions: [{ label: "MPesa Number", value: "+1234567890" }],
   },
 ];
-
-export const CONTACT_INFO = {
-  whatsapp: "https://wa.me/38978231801",
-  email: "support@protipsbet.com",
-};

@@ -67,11 +67,6 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
     id: "mpesa_global",
     name: "MPesa Global",
     instant: false,
-    contactOnly: true,
+    instructions: [{ label: "MPesa Number", value: "+1234567890" }],
   },
 ];
-
-export const CONTACT_INFO = {
-  whatsapp: "https://wa.me/38978231801",
-  email: "support@protipsbet.com",
-};

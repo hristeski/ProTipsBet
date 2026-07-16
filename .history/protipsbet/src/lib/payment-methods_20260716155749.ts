@@ -72,6 +72,6 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
 ];
 
 export const CONTACT_INFO = {
-  whatsapp: "https://wa.me/38978231801",
+  whatsapp: "https://wa.me/389 78 231 801",
   email: "support@protipsbet.com",
 };

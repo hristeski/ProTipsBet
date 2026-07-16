@@ -6,7 +6,7 @@ import { PRICING_PLANS } from "@/lib/pricing";
 
 export default function PricingPlans() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-6">
       {PRICING_PLANS.map((plan) => (
         <div
           key={plan.id}
@@ -18,7 +18,7 @@ export default function PricingPlans() {
         >
           {plan.badge && (
             <div
-              className={`absolute -top-0 left-1/2 -translate-x-1/2 text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full flex items-center gap-1 ${
+              className={`absolute -top-1 left-1/2 -translate-x-1/2 text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full flex items-center gap-1 ${
                 plan.highlighted
                   ? "bg-emerald-500 text-neutral-950"
                   : "bg-neutral-800 text-zinc-300 border border-neutral-700"

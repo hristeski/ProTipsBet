@@ -547,7 +547,7 @@ function CheckoutContent() {
               required
               value={whatsapp}
               onChange={(e) => setWhatsapp(e.target.value)}
-              placeholder="+389 78 231 801"
+              placeholder="+389 70 000 000"
               className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-emerald-500 text-white transition-colors"
             />
           </div>
