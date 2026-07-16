@@ -13,20 +13,23 @@ export interface BannerData {
 interface BannerWallProps {
   title?: string;
   banners: BannerData[];
-  size?: "small" | "medium" | "large";
 }
 
-export default function BannerWall({ title = "Sponsored", banners, size = "medium" }: BannerWallProps) {
+export default function BannerWall({ title = "Sponsored", banners }: BannerWallProps) {
   if (!banners.length) return null;
 
   return (
-    <section className="py-8">
+    {/* Додадено е flex-col items-center за целата секција да биде центрирана */}
+    <section className="py-8 px-4 w-full flex flex-col items-center">
       <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-3 text-center">
         {title}
       </p>
-      <div className="flex flex-wrap justify-center gap-2">
+      
+      {/* Менуваме од Grid во Flex со wrap и justify-center */}
+      <div className="flex flex-wrap justify-center items-center gap-4 max-w-6xl w-full">
         {banners.map((b) => (
-          <div key={b.id} className="w-[45%] max-w-[200px] md:w-[22%] lg:w-[15%]">
+          {/* Овој div ги контролира големините (наместо колоните од гридот) */}
+          <div key={b.id} className="w-[45%] md:w-[22%] lg:w-[15%] min-w-[120px] max-w-[200px]">
             <BannerAdSlot
               id={b.id}
               href={b.href}
@@ -35,7 +38,6 @@ export default function BannerWall({ title = "Sponsored", banners, size = "mediu
               alt={b.alt}
               width={b.width}
               height={b.height}
-              size={size}
             />
           </div>
         ))}

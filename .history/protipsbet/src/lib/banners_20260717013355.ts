@@ -31,9 +31,9 @@ export const ALL_BANNERS: BannerData[] = [
   { id: "16", href: "https://fixingmatch.bet-sportal.com/", videoSrc: "/banners/prediction-banner-16.mp4", imgSrc: "/banners/prediction-banner-16.webp", alt: "My bet of the day sure wins", width: 96, height: 32 },
   { id: "17", href: "https://strongfixed.bet-sportal.com/", videoSrc: "/banners/prediction-banner-17.mp4", imgSrc: "/banners/prediction-banner-17.webp", alt: "Banker bet of the day", width: 96, height: 32 },
   { id: "18", href: "https://zulubet-1x2.com/", videoSrc: "/banners/prediction-banner-18.mp4", imgSrc: "/banners/prediction-banner-18.webp", alt: "Single bet of the day", width: 96, height: 32 },
-    { id: "19", href: "https://darkweb.bet-sportal.com/", videoSrc: "/banners/dark-web-fixed-matches.mp4", imgSrc: "/banners/dark-web-fixed-matches.webp", alt: "Dark web fixed matches", width: 96, height: 32 },
-  { id: "20", href: "https://legitfixedmatches.com/", videoSrc: "/banners/legit-fixed-matches.mp4", imgSrc: "/banners/legit-fixed-matches.webp", alt: "Legit fixed matches", width: 96, height: 32 },
-  { id: "21", href: "https://ronaldo-7.net/", videoSrc: "/banners/accurate-soccer-prediction.mp4", imgSrc: "/banners/accurate-soccer-prediction.webp", alt: "Accurate soccer predictions", width: 96, height: 32 },
+    { id: "19", href: "https://darkweb.bet-sportal.com/", videoSrc: "/raw-banners/dark-web-fixed-matches.mp4", imgSrc: "/banners/prediction-banner-18.webp", alt: "Single bet of the day", width: 96, height: 32 },
+  { id: "20", href: "https://legitfixedmatches.com/", videoSrc: "/raw-banners/legit-fixed-matches.mp4", imgSrc: "/banners/prediction-banner-18.webp", alt: "Single bet of the day", width: 96, height: 32 },
+  { id: "21", href: "https://ronaldo-7.net/", videoSrc: "/raw-banners/accurate-soccer-predictions.mp4", imgSrc: "/banners/prediction-banner-18.webp", alt: "Single bet of the day", width: 96, height: 32 },
 
 ];
 

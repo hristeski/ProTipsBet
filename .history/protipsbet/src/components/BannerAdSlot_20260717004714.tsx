@@ -5,13 +5,19 @@ import { useEffect, useRef, useState } from "react";
 interface BannerAdSlotProps {
   id: string;
   href?: string;
-  videoSrc?: string;
-  imgSrc?: string;
+  videoSrc?: string;    // /banners/naslov.mp4
+  imgSrc?: string;       // static fallback (jpg/png/webp) - optional
   alt?: string;
   size?: "small" | "medium" | "large";
-  width: number;
-  height: number;
+  width: number;         // REQUIRED - avoids layout shift (CLS)
+  height: number;        // REQUIRED
 }
+
+const SIZE_MAP = {
+  small: "aspect-[3/1]",
+  medium: "aspect-[4/1]",
+  large: "aspect-[2/1]",
+};
 
 export default function BannerAdSlot({
   id,
@@ -27,6 +33,8 @@ export default function BannerAdSlot({
   const [isVisible, setIsVisible] = useState(false);
   const [videoFailed, setVideoFailed] = useState(false);
 
+  // Only start loading the actual media once the slot is near the viewport.
+  // This is what actually saves you from 50 banners loading at once.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -38,7 +46,7 @@ export default function BannerAdSlot({
           observer.disconnect();
         }
       },
-      { rootMargin: "300px" }
+      { rootMargin: "300px" } // start loading 300px before it's on screen
     );
 
     observer.observe(el);
@@ -53,12 +61,12 @@ export default function BannerAdSlot({
     <div
       ref={containerRef}
       data-ad-slot={id}
-      className="relative w-full rounded-lg overflow-hidden border border-zinc-800 bg-zinc-900/60 flex items-center justify-center group"
+      className={`relative w-full ${SIZE_MAP[size]} rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900/60 flex items-center justify-center group`}
       style={{ aspectRatio: `${width} / ${height}` }}
     >
       {showPlaceholder && (
         <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-700">
-          Ad #{id}
+          Ad Slot #{id}
         </span>
       )}
 
@@ -73,8 +81,7 @@ export default function BannerAdSlot({
           playsInline
           preload="none"
           onError={() => setVideoFailed(true)}
-          /* Променето во object-contain за да не се сече текстот */
-          className="absolute inset-0 w-full h-full object-contain"
+          className="w-full h-full object-cover"
         />
       )}
 
@@ -87,8 +94,7 @@ export default function BannerAdSlot({
           height={height}
           loading="lazy"
           decoding="async"
-          /* Променето во object-contain */
-          className="absolute inset-0 w-full h-full object-contain"
+          className="w-full h-full object-cover"
         />
       )}
     </div>
@@ -101,7 +107,6 @@ export default function BannerAdSlot({
         target="_blank"
         rel="sponsored noopener noreferrer nofollow"
         aria-label={alt ?? `Advertisement ${id}`}
-        className="block"
       >
         {content}
       </a>

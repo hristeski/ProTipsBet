@@ -28,18 +28,14 @@ export const ALL_BANNERS: BannerData[] = [
   { id: "13", href: "https://bestfixedmatches.com/", videoSrc: "/banners/prediction-banner-13.mp4", imgSrc: "/banners/prediction-banner-13.webp", alt: "Top 10 most sure bet of the day", width: 96, height: 32 },
   { id: "14", href: "https://tanzania-bet.com/", videoSrc: "/banners/prediction-banner-14.mp4", imgSrc: "/banners/prediction-banner-14.webp", alt: "Most sure bet of the day", width: 96, height: 32 },
   { id: "15", href: "https://fixedmatches.bet-sportal.com/", videoSrc: "/banners/prediction-banner-15.mp4", imgSrc: "/banners/prediction-banner-15.webp", alt: "Soccervista bet of the today", width: 96, height: 32 },
-  { id: "16", href: "https://fixingmatch.bet-sportal.com/", videoSrc: "/banners/prediction-banner-16.mp4", imgSrc: "/banners/prediction-banner-16.webp", alt: "My bet of the day sure wins", width: 96, height: 32 },
-  { id: "17", href: "https://strongfixed.bet-sportal.com/", videoSrc: "/banners/prediction-banner-17.mp4", imgSrc: "/banners/prediction-banner-17.webp", alt: "Banker bet of the day", width: 96, height: 32 },
-  { id: "18", href: "https://zulubet-1x2.com/", videoSrc: "/banners/prediction-banner-18.mp4", imgSrc: "/banners/prediction-banner-18.webp", alt: "Single bet of the day", width: 96, height: 32 },
-    { id: "19", href: "https://darkweb.bet-sportal.com/", videoSrc: "/banners/dark-web-fixed-matches.mp4", imgSrc: "/banners/dark-web-fixed-matches.webp", alt: "Dark web fixed matches", width: 96, height: 32 },
-  { id: "20", href: "https://legitfixedmatches.com/", videoSrc: "/banners/legit-fixed-matches.mp4", imgSrc: "/banners/legit-fixed-matches.webp", alt: "Legit fixed matches", width: 96, height: 32 },
-  { id: "21", href: "https://ronaldo-7.net/", videoSrc: "/banners/accurate-soccer-prediction.mp4", imgSrc: "/banners/accurate-soccer-prediction.webp", alt: "Accurate soccer predictions", width: 96, height: 32 },
-
+  { id: "16", href: "https://www.betexplorer.com", videoSrc: "/banners/prediction-banner-16.mp4", imgSrc: "/banners/prediction-banner-16.webp", alt: "My bet of the day sure wins", width: 96, height: 32 },
+  { id: "17", href: "https://www.forebet.com", videoSrc: "/banners/prediction-banner-17.mp4", imgSrc: "/banners/prediction-banner-17.webp", alt: "Banker bet of the day", width: 96, height: 32 },
+  { id: "18", href: "https://www.soccerpunter.com", videoSrc: "/banners/prediction-banner-18.mp4", imgSrc: "/banners/prediction-banner-18.webp", alt: "Single bet of the day", width: 96, height: 32 },
 ];
 
 // Distributed across pages - a few everywhere, not all in one place
-export const HOME_BANNERS = ALL_BANNERS.slice(0, 5);
-export const FREE_TIPS_BANNERS = ALL_BANNERS.slice(5, 10);
-export const VIP_BANNERS = ALL_BANNERS.slice(10, 15);
-export const HISTORY_BANNERS = ALL_BANNERS.slice(15, 21);
-// export const FOOTER_BANNERS = ALL_BANNERS.slice(15, 21);
+export const HOME_BANNERS = ALL_BANNERS.slice(0, 4);
+export const FREE_TIPS_BANNERS = ALL_BANNERS.slice(4, 9);
+export const VIP_BANNERS = ALL_BANNERS.slice(9, 12);
+export const HISTORY_BANNERS = ALL_BANNERS.slice(12, 18);
+// export const FOOTER_BANNERS = ALL_BANNERS.slice(15, 18);

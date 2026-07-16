@@ -8,7 +8,6 @@ interface BannerAdSlotProps {
   videoSrc?: string;
   imgSrc?: string;
   alt?: string;
-  size?: "small" | "medium" | "large";
   width: number;
   height: number;
 }
@@ -19,7 +18,6 @@ export default function BannerAdSlot({
   videoSrc,
   imgSrc,
   alt,
-  size = "medium",
   width,
   height,
 }: BannerAdSlotProps) {

@@ -13,10 +13,9 @@ export interface BannerData {
 interface BannerWallProps {
   title?: string;
   banners: BannerData[];
-  size?: "small" | "medium" | "large";
 }
 
-export default function BannerWall({ title = "Sponsored", banners, size = "medium" }: BannerWallProps) {
+export default function BannerWall({ title = "Sponsored", banners }: BannerWallProps) {
   if (!banners.length) return null;
 
   return (
@@ -35,7 +34,6 @@ export default function BannerWall({ title = "Sponsored", banners, size = "mediu
               alt={b.alt}
               width={b.width}
               height={b.height}
-              size={size}
             />
           </div>
         ))}
