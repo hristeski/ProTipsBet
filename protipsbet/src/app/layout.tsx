@@ -36,7 +36,6 @@ export const metadata: Metadata = {
     siteName: "ProTipsBet",
     title: "ProTipsBet | Verified VIP Sports Predictions",
     description: "Daily football predictions backed by data and a verified track record.",
-    images: ["/og-image.jpg"],
   },
   twitter: {
     card: "summary_large_image",
