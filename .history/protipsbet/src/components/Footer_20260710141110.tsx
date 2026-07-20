@@ -50,7 +50,6 @@ export default function Footer() {
               <li><Link href="/free-tips" className="hover:text-emerald-400 transition-colors">Free Daily Tips</Link></li>
               <li><Link href="/vip-tips" className="hover:text-emerald-400 transition-colors flex items-center gap-2">VIP Analytics <span className="bg-amber-500/10 text-amber-400 text-[10px] px-1.5 py-0.5 rounded uppercase font-black tracking-wider">Pro</span></Link></li>
               <li><Link href="/history" className="hover:text-emerald-400 transition-colors">Verified History</Link></li>
-              <li><Link href="/partners" className="hover:text-white transition-colors">Become a Partner</Link></li>
             </ul>
           </div>
 

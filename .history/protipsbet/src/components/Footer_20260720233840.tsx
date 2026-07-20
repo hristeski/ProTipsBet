@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { Mail, ShieldAlert } from "lucide-react";
 
+import BannerWall from "@/components/BannerWall";
+import { FOOTER_BANNERS } from "@/lib/banners";
+
 // Директни SVG икони за да не зависиме од надворешни пакети за брендови
 const TwitterIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -50,8 +53,8 @@ export default function Footer() {
               <li><Link href="/free-tips" className="hover:text-emerald-400 transition-colors">Free Daily Tips</Link></li>
               <li><Link href="/vip-tips" className="hover:text-emerald-400 transition-colors flex items-center gap-2">VIP Analytics <span className="bg-amber-500/10 text-amber-400 text-[10px] px-1.5 py-0.5 rounded uppercase font-black tracking-wider">Pro</span></Link></li>
               <li><Link href="/history" className="hover:text-emerald-400 transition-colors">Verified History</Link></li>
-              <li><Link href="/partners" className="hover:text-white transition-colors">Become a Partner</Link></li>
             </ul>
+                        
           </div>
 
           {/* Правни Линкови */}
@@ -75,6 +78,7 @@ export default function Footer() {
             </div>
           </div>
         </div>
+<BannerWall title="Sponsored" banners={FOOTER_BANNERS} />
 
         {/* Долна Лента (Bottom Bar) */}
         <div className="border-t border-zinc-800/50 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">

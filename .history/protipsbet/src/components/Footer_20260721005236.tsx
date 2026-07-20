@@ -1,5 +1,9 @@
 import Link from "next/link";
 import { Mail, ShieldAlert } from "lucide-react";
+import { memo } from "react";
+
+import BannerAdSlot from "@/components/BannerAdSlot";
+import { FOOTER_BANNERS } from "@/lib/banners";
 
 // Директни SVG икони за да не зависиме од надворешни пакети за брендови
 const TwitterIcon = () => (
@@ -16,7 +20,7 @@ const InstagramIcon = () => (
   </svg>
 );
 
-export default function Footer() {
+const Footer = memo(function Footer() {
   return (
     <footer className="bg-zinc-950 border-t border-zinc-800 pt-16 pb-8 mt-20">
       <div className="max-w-7xl mx-auto px-6">
@@ -50,8 +54,8 @@ export default function Footer() {
               <li><Link href="/free-tips" className="hover:text-emerald-400 transition-colors">Free Daily Tips</Link></li>
               <li><Link href="/vip-tips" className="hover:text-emerald-400 transition-colors flex items-center gap-2">VIP Analytics <span className="bg-amber-500/10 text-amber-400 text-[10px] px-1.5 py-0.5 rounded uppercase font-black tracking-wider">Pro</span></Link></li>
               <li><Link href="/history" className="hover:text-emerald-400 transition-colors">Verified History</Link></li>
-              <li><Link href="/partners" className="hover:text-white transition-colors">Become a Partner</Link></li>
             </ul>
+            
           </div>
 
           {/* Правни Линкови */}
@@ -75,7 +79,6 @@ export default function Footer() {
             </div>
           </div>
         </div>
-
         {/* Долна Лента (Bottom Bar) */}
         <div className="border-t border-zinc-800/50 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-zinc-500 text-sm text-center md:text-left font-medium">
@@ -91,4 +94,6 @@ export default function Footer() {
       </div>
     </footer>
   );
-}
+});
+
+export default Footer;
