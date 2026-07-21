@@ -1,46 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, MessageSquare, Send, CheckCircle2, ShieldQuestion, Phone, Loader2 } from "lucide-react";
-import { API_BASE } from "@/lib/api";
+import { Mail, MessageSquare, Send, CheckCircle2, ShieldQuestion, Phone } from "lucide-react";
 
 export default function ContactClient() {
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [subject, setSubject] = useState("vip");
-  const [message, setMessage] = useState("");
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitting(true);
-    setError(null);
-
-    try {
-      const res = await fetch(`${API_BASE}/api/contact`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, subject, message }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        throw new Error(data?.message || "Испраќањето не успеа. Обиди се повторно.");
-      }
-
-      setIsSubmitted(true);
-      setName("");
-      setEmail("");
-      setSubject("vip");
-      setMessage("");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Нешто тргна наопаку.");
-    } finally {
-      setSubmitting(false);
-    }
+    // Овде подоцна ќе се поврзе со C# бекендот (ContactController)
+    setIsSubmitted(true);
   };
 
   return (
@@ -134,8 +103,6 @@ export default function ContactClient() {
                     <input 
                       type="text" 
                       required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
                       placeholder="John Doe"
                       className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-emerald-500 text-white transition-colors"
                     />
@@ -145,8 +112,6 @@ export default function ContactClient() {
                     <input 
                       type="email" 
                       required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
                       placeholder="john@example.com"
                       className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-emerald-500 text-white transition-colors"
                     />
@@ -155,11 +120,7 @@ export default function ContactClient() {
 
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Subject</label>
-                  <select
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-emerald-500 text-white transition-colors appearance-none"
-                  >
+                  <select className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-emerald-500 text-white transition-colors appearance-none">
                     <option value="vip">VIP Subscription Issue</option>
                     <option value="payment">Payment & Crypto</option>
                     <option value="general">General Inquiry</option>
@@ -172,26 +133,16 @@ export default function ContactClient() {
                   <textarea 
                     required
                     rows={5}
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
                     placeholder="How can we help you?"
                     className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-emerald-500 text-white transition-colors resize-none"
                   ></textarea>
                 </div>
 
-                {error && (
-                  <div className="bg-red-500/10 border border-red-500/30 text-red-300 rounded-xl p-3 text-xs">
-                    {error}
-                  </div>
-                )}
-
                 <button 
                   type="submit" 
-                  disabled={submitting}
-                  className="w-full py-4 bg-white text-zinc-950 font-black rounded-xl hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+                  className="w-full py-4 bg-white text-zinc-950 font-black rounded-xl hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2"
                 >
-                  {submitting ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
-                  {submitting ? "Sending..." : "Send Message"}
+                  <Send size={18} /> Send Message
                 </button>
               </form>
             )}

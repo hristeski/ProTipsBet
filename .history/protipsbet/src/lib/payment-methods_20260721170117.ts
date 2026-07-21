@@ -30,18 +30,6 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
       { label: "BTC", value: "1FFYFfafG6roADdomQeeBeT7KDCGkD8288", showQr: true },
     ],
   },
-    {
-    id: "skrill",
-    name: "Skrill",
-    instant: false,
-    instructions: [{ label: "Skrill Email", value: "support@protipsbet.com" }],
-  },
-  {
-    id: "neteller",
-    name: "Neteller",
-    instant: false,
-    instructions: [{ label: "Neteller Email", value: "support@protipsbet.com" }],
-  },
   {
     id: "western_union",
     name: "Western Union",
@@ -55,8 +43,20 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
     contactOnly: true,
   },
   {
+    id: "skrill",
+    name: "Skrill",
+    instant: false,
+    instructions: [{ label: "Skrill Email", value: "support@protipsbet.com" }],
+  },
+  {
+    id: "neteller",
+    name: "Neteller",
+    instant: false,
+    instructions: [{ label: "Neteller Email", value: "support@protipsbet.com" }],
+  },
+  {
     id: "paypal",
-    name: "PayPal",
+    name: "PayPalGlobal",
     instant: false,
     contactOnly: true,
   },

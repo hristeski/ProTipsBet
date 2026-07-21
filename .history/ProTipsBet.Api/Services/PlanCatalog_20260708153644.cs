@@ -18,7 +18,7 @@ namespace ProTipsBet.Api.Services
     {
         public static readonly List<PlanDefinition> Plans = new()
         {
-            new PlanDefinition { PlanType = PlanType.Daily,   FrontendId = "daily",   Name = "Daily Pass",   Price = 20, Currency = "EUR", DurationDays = 1 },
+            new PlanDefinition { PlanType = PlanType.Daily,   FrontendId = "daily",   Name = "Daily Pass",   Price = 19, Currency = "EUR", DurationDays = 1 },
             new PlanDefinition { PlanType = PlanType.Weekly,  FrontendId = "weekly",  Name = "Weekly Pass",  Price = 25, Currency = "EUR", DurationDays = 7 },
             new PlanDefinition { PlanType = PlanType.Monthly, FrontendId = "monthly", Name = "Monthly Pro",  Price = 60, Currency = "EUR", DurationDays = 30 },
         };

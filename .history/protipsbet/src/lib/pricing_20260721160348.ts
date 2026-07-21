@@ -19,9 +19,9 @@ export const PRICING_PLANS: PricingPlan[] = [
   {
     id: "daily",
     name: "Daily Pass",
-    price: 20,
+    price: 19,
     period: "/day",
-    perDay: 20,
+    perDay: 19,
     badge: "Quick Test",
     benefits: [
       "Full VIP access for 24 hours",

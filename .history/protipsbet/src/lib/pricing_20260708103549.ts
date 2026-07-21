@@ -19,9 +19,9 @@ export const PRICING_PLANS: PricingPlan[] = [
   {
     id: "daily",
     name: "Daily Pass",
-    price: 20,
+    price: 19,
     period: "/day",
-    perDay: 20,
+    perDay: 19,
     badge: "Quick Test",
     benefits: [
       "Full VIP access for 24 hours",
@@ -39,7 +39,6 @@ export const PRICING_PLANS: PricingPlan[] = [
     benefits: [
       "7 days of full VIP access",
       "Daily VIP predictions (2-3 matches)",
-            "Average odds: 2.50 - 5.00",
       "Detailed match analytics",
     ],
   },
@@ -53,7 +52,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     highlighted: true,
     benefits: [
       "Daily VIP predictions (2-3 matches)",
-      "Average odds: 5.00 - 10.00",
+      "Average odds: 2.50 - 5.00",
       "Detailed match analytics",
       "Bankroll management guide",
       "24/7 priority support",
