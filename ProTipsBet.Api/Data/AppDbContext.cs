@@ -16,6 +16,7 @@ namespace ProTipsBet.Api.Data
         public DbSet<Banner> Banners => Set<Banner>();
         public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
         public DbSet<TicketRecord> TicketRecords { get; set; }
+        public DbSet<NewsletterSubscriber> NewsletterSubscribers { get; set; }
         // public DbSet<TicketRecordLeg> TicketRecordLegs => Set<TicketRecordLeg>();
 public DbSet<TicketRecordLeg> TicketRecordLegs { get; set; }        
 

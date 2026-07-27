@@ -69,56 +69,68 @@ namespace ProTipsBet.Api.Controllers
             _db.Tips.Add(tip);
             await _db.SaveChangesAsync();
 
-            try
-            {
-                string subject;
-                string body;
-                List<string> targetEmails;
+           try
+{
+    string subject;
+    string body;
+    List<string> targetEmails;
 
-                if (tip.IsVip)
-                {
-                    subject = "💎 New VIP Tip Published!";
-                    body = $@"
-                        <div style='font-family: Arial, sans-serif; padding: 20px;'>
-                            <h2 style='color: #d97706;'>A new VIP prediction is waiting for you!</h2>
-                            <p>We just published a new VIP tip for <strong>{tip.MatchDate:dd MMM yyyy}</strong>.</p>
-                            <p>Log in to your ProTipsBet account now to see the latest premium prediction and secure your profit.</p>
-                            <br/>
-                            <a href='https://protipsbet.com/login' style='background-color: #d97706; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;'>View VIP Tip</a>
-                        </div>";
+    if (tip.IsVip)
+    {
+        subject = "💎 New VIP Tip Published!";
+        body = $@"
+            <div style='font-family: Arial, sans-serif; padding: 20px;'>
+                <h2 style='color: #d97706;'>A new VIP prediction is waiting for you!</h2>
+                <p>We just published a new VIP tip for <strong>{tip.MatchDate:dd MMM yyyy}</strong>.</p>
+                <p>Log in to your ProTipsBet account now to see the latest premium prediction and secure your profit.</p>
+                <br/>
+                <a href='https://protipsbet.com/login' style='background-color: #d97706; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;'>View VIP Tip</a>
+            </div>";
 
-                    targetEmails = await _db.Users
-                        .Where(u => u.IsVip && u.IsActive)
-                        .Select(u => u.Email)
-                        .ToListAsync();
-                }
-                else
-                {
-                    subject = "🔥 New FREE Tip Available!";
-                    body = $@"
-                        <div style='font-family: Arial, sans-serif; padding: 20px;'>
-                            <h2 style='color: #2563eb;'>We just posted a new FREE tip!</h2>
-                            <p>A new free prediction for <strong>{tip.MatchDate:dd MMM yyyy}</strong> is now live on our platform.</p>
-                            <p>Head over to ProTipsBet to check it out before the match starts.</p>
-                            <br/>
-                            <a href='https://protipsbet.com/free-tips' style='background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;'>View Free Tip</a>
-                        </div>";
+        targetEmails = await _db.Users
+            .Where(u => u.IsVip && u.IsActive)
+            .Select(u => u.Email)
+            .ToListAsync();
+    }
+    else
+    {
+        subject = "🔥 New FREE Tip Available!";
+        body = $@"
+            <div style='font-family: Arial, sans-serif; padding: 20px;'>
+                <h2 style='color: #2563eb;'>We just posted a new FREE tip!</h2>
+                <p>A new free prediction for <strong>{tip.MatchDate:dd MMM yyyy}</strong> is now live on our platform.</p>
+                <p>Head over to ProTipsBet to check it out before the match starts.</p>
+                <br/>
+                <a href='https://protipsbet.com/free-tips' style='background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;'>View Free Tip</a>
+            </div>";
 
-                    targetEmails = await _db.Users
-                        .Where(u => u.IsActive)
-                        .Select(u => u.Email)
-                        .ToListAsync();
-                }
+        targetEmails = await _db.Users
+            .Where(u => u.IsActive)
+            .Select(u => u.Email)
+            .ToListAsync();
+    }
 
-                if (targetEmails.Any())
-                {
-                    var emailTasks = targetEmails.Select(email => _emailService.SendEmailAsync(email, subject, body));
-                    await Task.WhenAll(emailTasks);
-                }
-            }
-            catch
-            {
-            }
+    // NEW: додаваме ги и newsletter-претплатниците (visitors без account)
+    // на истата листа, dedupe-ирано за да некој не добие двоен мејл
+    // ако случајно веќе е и регистриран корисник со ист email.
+    var newsletterEmails = await _db.NewsletterSubscribers
+        .Where(s => s.IsActive)
+        .Select(s => s.Email)
+        .ToListAsync();
+
+    targetEmails = targetEmails
+        .Union(newsletterEmails, StringComparer.OrdinalIgnoreCase)
+        .ToList();
+
+    if (targetEmails.Any())
+    {
+        var emailTasks = targetEmails.Select(email => _emailService.SendEmailAsync(email, subject, body));
+        await Task.WhenAll(emailTasks);
+    }
+}
+catch
+{
+}
 
             return Ok(tip);
         }

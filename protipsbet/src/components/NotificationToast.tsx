@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { X, Percent, Trophy, MessageCircle } from "lucide-react";
+import { X, Percent, Trophy } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 interface ToastMessage {
@@ -12,7 +12,6 @@ interface ToastMessage {
   accent: string;
 }
 
-// Поагресивни и поубедливи маркетиншки пораки
 const MESSAGES: ToastMessage[] = [
   {
     icon: Trophy,
@@ -25,12 +24,6 @@ const MESSAGES: ToastMessage[] = [
     text: "⚡ Flash Promo: Get 20% OFF the Monthly VIP pass today only!",
     href: "/vip-tips",
     accent: "text-amber-400 bg-amber-500/10 border-amber-500/20",
-  },
-  {
-    icon: MessageCircle,
-    text: "💬 Want to win big? Join our Telegram group for exclusive live picks!",
-    href: "/contact",
-    accent: "text-sky-400 bg-sky-500/10 border-sky-500/20",
   },
 ];
 
@@ -59,7 +52,6 @@ export default function NotificationToast() {
   const Icon = msg.icon;
 
   return (
-    // ПРОМЕНАТА Е ТУКА: top-1/3 за мобилен, md:top-24 за десктоп
     <div className="fixed top-2/18 md:top-24 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-sm">
       <div
         key={index}
