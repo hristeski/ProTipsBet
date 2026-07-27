@@ -1,6 +1,0 @@
-@ProTipsBet.Api_HostAddress = https://protipsbet.com
-
-GET {{ProTipsBet.Api_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
