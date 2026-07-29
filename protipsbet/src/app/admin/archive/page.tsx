@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Trash2, Loader2, X, Image as ImageIcon, ListPlus, Calculator } from "lucide-react";
+import { Plus, Trash2, Pencil, Loader2, X, Image as ImageIcon, ListPlus, Calculator } from "lucide-react";
 import { API_BASE, authHeaders } from "@/lib/api";
 
 interface Leg {
@@ -20,12 +20,7 @@ interface Ticket {
   totalOdds: number;
   matchDate: string;
   isVip: boolean;
-  legs: any[];
-}
-
-function getToken() {
-  if (typeof window === "undefined") return null;
-  return window.localStorage.getItem("protipsbet_token");
+  legs: Leg[];
 }
 
 const emptyLeg = (): Leg => ({ league: "", matchDate: "", homeTeam: "", awayTeam: "", prediction: "", odds: "" });
@@ -35,6 +30,7 @@ export default function AdminArchivePage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   // Form State
   const [file, setFile] = useState<File | null>(null);
@@ -46,10 +42,44 @@ export default function AdminArchivePage() {
 
   // Auto-calculate odds
   const totalOdds = legs.reduce((acc, l) => acc * (Number(l.odds) || 1), 1);
+  const isEditMode = editingId !== null;
 
-  useEffect(() => {
-    fetchTickets();
-  }, []);
+  const resetForm = () => {
+    setFile(null);
+    setPreviewUrl(null);
+    setDescription("");
+    setMatchDate("");
+    setIsVip(false);
+    setLegs([emptyLeg()]);
+  };
+
+  const openCreateModal = () => {
+    setEditingId(null);
+    resetForm();
+    setIsModalOpen(true);
+  };
+
+  const openEdit = (ticket: Ticket) => {
+    setEditingId(ticket.id);
+    setDescription(ticket.description || "");
+    setMatchDate(ticket.matchDate ? new Date(ticket.matchDate).toISOString().split("T")[0] : "");
+    setIsVip(ticket.isVip || false);
+    setFile(null);
+    setPreviewUrl(ticket.imageUrl ? `${API_BASE}${ticket.imageUrl}` : null);
+    setLegs(
+      ticket.legs?.length
+        ? ticket.legs.map((leg: Leg) => ({
+            league: leg.league || "",
+            matchDate: leg.matchDate ? new Date(leg.matchDate).toISOString().split("T")[0] : "",
+            homeTeam: leg.homeTeam || "",
+            awayTeam: leg.awayTeam || "",
+            prediction: leg.prediction || "",
+            odds: leg.odds ?? "",
+          }))
+        : [emptyLeg()]
+    );
+    setIsModalOpen(true);
+  };
 
   const fetchTickets = async () => {
     try {
@@ -66,6 +96,10 @@ export default function AdminArchivePage() {
     fetchTickets();
   };
 
+  useEffect(() => {
+    fetchTickets();
+  }, []);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
     if (selected) {
@@ -76,14 +110,16 @@ export default function AdminArchivePage() {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) return alert("Please select an image!");
+    if (!isEditMode && !file) return alert("Please select an image!");
 
     // SAFE DATE HANDLING: Default to today if empty
     const finalDate = matchDate ? new Date(matchDate).toISOString() : new Date().toISOString();
 
     setSubmitting(true);
     const formData = new FormData();
-    formData.append("image", file);
+    if (file) {
+      formData.append("image", file);
+    }
     formData.append("description", description || "Winning Ticket");
     formData.append("totalOdds", totalOdds.toFixed(2));
     formData.append("matchDate", finalDate);
@@ -104,18 +140,17 @@ export default function AdminArchivePage() {
     formData.append("legsJson", JSON.stringify(validLegs));
 
     try {
-      const res = await fetch(`${API_BASE}/api/admin/archive`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${getToken()}` },
+      const url = isEditMode ? `${API_BASE}/api/admin/archive/${editingId}` : `${API_BASE}/api/admin/archive`;
+      const res = await fetch(url, {
+        method: isEditMode ? "PUT" : "POST",
+        headers: authHeaders(),
         body: formData,
       });
 
       if (res.ok) {
         setIsModalOpen(false);
-        setFile(null);
-        setPreviewUrl(null);
-        setLegs([emptyLeg()]);
-        setDescription("");
+        setEditingId(null);
+        resetForm();
         fetchTickets();
       } else {
         const data = await res.json().catch(() => null);
@@ -138,7 +173,7 @@ export default function AdminArchivePage() {
           <p className="text-neutral-400">Manage history and winning slips</p>
         </div>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={openCreateModal}
           className="flex items-center gap-2 bg-emerald-500 text-neutral-950 px-5 py-2.5 rounded-xl font-bold hover:bg-emerald-400 transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)]"
         >
           <Plus size={20} /> Upload New Ticket
@@ -156,12 +191,20 @@ export default function AdminArchivePage() {
             <div className="p-4 flex flex-col flex-grow">
               <h3 className="font-bold text-white text-lg">{ticket.description}</h3>
               <p className="text-emerald-400 font-black mb-4">Total Odds: @{ticket.totalOdds}</p>
-              <button
-                onClick={() => deleteTicket(ticket.id)}
-                className="mt-auto w-full flex items-center justify-center gap-2 py-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all text-sm font-bold"
-              >
-                <Trash2 size={16} /> Delete Ticket
-              </button>
+              <div className="mt-auto flex gap-2">
+                <button
+                  onClick={() => openEdit(ticket)}
+                  className="flex-1 flex items-center justify-center gap-2 py-2 bg-amber-500/10 text-amber-500 rounded-lg hover:bg-amber-500 hover:text-white transition-all text-sm font-bold"
+                >
+                  <Pencil size={16} /> Edit
+                </button>
+                <button
+                  onClick={() => deleteTicket(ticket.id)}
+                  className="flex-1 flex items-center justify-center gap-2 py-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all text-sm font-bold"
+                >
+                  <Trash2 size={16} /> Delete
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -171,13 +214,16 @@ export default function AdminArchivePage() {
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
             <div className="flex justify-between items-center p-5 border-b border-neutral-800 bg-neutral-950">
-              <h2 className="font-black text-white text-xl">Upload Winning Ticket</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-neutral-500 hover:text-white"><X size={24} /></button>
+              <h2 className="font-black text-white text-xl">{isEditMode ? "Edit Winning Ticket" : "Upload Winning Ticket"}</h2>
+              <button onClick={() => { setIsModalOpen(false); setEditingId(null); resetForm(); }} className="text-neutral-500 hover:text-white"><X size={24} /></button>
             </div>
 
             <form onSubmit={handleUpload} className="p-6 overflow-y-auto space-y-6">
               {/* Image Upload Area */}
               <div className="flex flex-col items-center justify-center w-full h-48 border-2 border-neutral-800 border-dashed rounded-2xl hover:border-emerald-500/50 transition-colors relative overflow-hidden bg-neutral-950/50">
+                {isEditMode && !file && previewUrl && (
+                  <div className="absolute inset-0 bg-black/20 z-0" />
+                )}
                 <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" accept="image/*" onChange={handleFileChange} />
                 {previewUrl ? (
                    // eslint-disable-next-line
@@ -185,7 +231,7 @@ export default function AdminArchivePage() {
                 ) : (
                   <div className="text-center text-neutral-500">
                     <ImageIcon size={40} className="mx-auto mb-2 opacity-50" />
-                    <p className="font-bold text-sm">Click or Drag image here</p>
+                    <p className="font-bold text-sm">{isEditMode ? "Click to replace image or keep current" : "Click or Drag image here"}</p>
                   </div>
                 )}
               </div>
@@ -237,7 +283,7 @@ export default function AdminArchivePage() {
 
               <div className="pt-4 border-t border-neutral-800">
                 <button type="submit" disabled={submitting} className="w-full bg-emerald-500 text-neutral-950 font-black py-3 rounded-xl hover:bg-emerald-400 disabled:opacity-50 transition-all flex justify-center items-center">
-                  {submitting ? <Loader2 className="animate-spin" /> : "Save to Archive"}
+                  {submitting ? <Loader2 className="animate-spin" /> : isEditMode ? "Save Changes" : "Save to Archive"}
                 </button>
               </div>
             </form>

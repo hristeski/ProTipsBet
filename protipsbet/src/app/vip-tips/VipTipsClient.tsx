@@ -2,54 +2,56 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ShieldCheck, Archive, CheckCircle2, XCircle, Crown, Loader2 } from "lucide-react";
+import { ShieldCheck, Archive, CheckCircle2, Crown, Loader2 } from "lucide-react";
 import TipCard from "@/components/TipCard";
 import BannerWall from "@/components/BannerWall";
 import PricingPlans from "@/components/PricingPlans";
 import { VIP_BANNERS } from "@/lib/banners";
 import { CRYPTO_MIN_NOTE } from "@/lib/pricing";
+import { API_BASE, authHeaders } from "@/lib/api";
 
-import { API_BASE } from "@/lib/api";
+interface Props {
+  initialVipMatches: any[];
+  initialVipArchive: any[];
+}
 
-export default function VipTipsClient() {
-  const [vipMatches, setVipMatches] = useState<any[]>([]);
-  const [vipArchive, setVipArchive] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function VipTipsClient({ initialVipMatches, initialVipArchive }: Props) {
+  const [vipMatches, setVipMatches] = useState<any[]>(initialVipMatches);
+  const [vipArchive] = useState<any[]>(initialVipArchive);
+  const [checkingVip, setCheckingVip] = useState(true);
   const [isUserVip, setIsUserVip] = useState(false);
 
+  // Server-делот секогаш враќа заклучена верзија (безбедно за SEO/анонимни).
+  // Тука, ако постои токен, повторно fetch-ame со Authorization за да ги
+  // "отклучиме" вистинските мечеви за платениот корисник.
   useEffect(() => {
-    const fetchData = async () => {
-      const token = localStorage.getItem("protipsbet_token");
-      
+    const token = localStorage.getItem("protipsbet_token");
+    if (!token) {
+      setCheckingVip(false);
+      return;
+    }
+
+    const unlockIfVip = async () => {
       try {
-        const tipsRes = await fetch(`${API_BASE}/api/tips`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-        
-        if (tipsRes.ok) {
-          const data = await tipsRes.json();
+        const res = await fetch(`${API_BASE}/api/tips`, { headers: authHeaders() });
+        if (res.ok) {
+          const data = await res.json();
           const vips = data.filter((t: any) => t.isVip);
-          const pendingVips = vips.filter((t: any) => t.result.toLowerCase() === "pending");
-          setVipMatches(pendingVips);
+          const pendingVips = vips.filter((t: any) => String(t.result).toLowerCase() === "pending");
 
           if (vips.length > 0 && vips[0].homeTeam !== "Locked VIP Match") {
             setIsUserVip(true);
+            setVipMatches(pendingVips);
           }
         }
-
-        const ticketsRes = await fetch(`${API_BASE}/api/tips/tickets`);
-        if (ticketsRes.ok) {
-          const tData = await ticketsRes.json();
-          setVipArchive(tData.filter((t: any) => t.isVip));
-        }
       } catch (err) {
-        console.error("Грешка при вчитување на податоците:", err);
+        console.error("Грешка при отклучување на VIP:", err);
       } finally {
-        setLoading(false);
+        setCheckingVip(false);
       }
     };
 
-    fetchData();
+    unlockIfVip();
   }, []);
 
   const formatMatchTime = (value?: string) => {
@@ -85,9 +87,7 @@ export default function VipTipsClient() {
         </div>
         <h2 className="hidden md:block font-bold text-xl text-white mb-4">Today's Premium Picks</h2>
 
-        {loading ? (
-          <div className="flex justify-center py-10"><Loader2 className="animate-spin text-amber-400" size={32} /></div>
-        ) : vipMatches.length === 0 ? (
+        {vipMatches.length === 0 ? (
           <div className="text-center py-12 border border-neutral-800 border-dashed rounded-2xl text-neutral-500">
             No VIP matches available at the moment, check back later.
           </div>
@@ -103,7 +103,7 @@ export default function VipTipsClient() {
                   awayTeam={match.awayTeam}
                   prediction={match.predictionType}
                   odds={match.odds}
-                  status={match.result.toLowerCase() as any}
+                  status={String(match.result).toLowerCase() as any}
                   isVip={true}
                   isUnlocked={match.homeTeam !== "Locked VIP Match"}
                 />
@@ -113,7 +113,11 @@ export default function VipTipsClient() {
         )}
       </div>
 
-      {!isUserVip && (
+      {checkingVip ? (
+        <div className="flex justify-center py-6">
+          <Loader2 className="animate-spin text-neutral-600" size={20} />
+        </div>
+      ) : !isUserVip ? (
         <div className="border-t border-neutral-900 pt-10 md:pt-14">
           <div className="text-center mb-8 md:mb-10">
             <h2 className="text-2xl md:text-4xl font-black mb-2 text-white">
@@ -141,45 +145,44 @@ export default function VipTipsClient() {
               ))}
             </div>
           </div>
-
-          <div className="mb-10 md:max-w-3xl md:mx-auto">
-            <div className="flex items-center gap-2 mb-6">
-              <Archive size={18} className="text-zinc-500" />
-              <h2 className="text-xl font-black text-white">Past VIP Tickets</h2>
-            </div>
-
-            {loading ? (
-              <div className="flex justify-center py-5"><Loader2 className="animate-spin text-neutral-500" size={24} /></div>
-            ) : vipArchive.length === 0 ? (
-              <p className="text-center text-neutral-600 text-sm py-5">There are no archived tickets available.</p>
-            ) : (
-              <div className="flex flex-col gap-3">
-                {vipArchive.map((tk) => (
-                  <div
-                    key={tk.id}
-                    className="flex items-center justify-between gap-4 bg-zinc-900/40 border border-emerald-500/20 rounded-xl px-4 py-3"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-zinc-500 mb-0.5">
-                        {new Date(tk.matchDate).toLocaleDateString()} • Verified Win
-                      </p>
-                      <p className="text-white font-bold text-sm truncate">{tk.description}</p>
-                    </div>
-                    <span className="text-white font-bold text-sm shrink-0">@ {tk.totalOdds.toFixed(2)}</span>
-                    <CheckCircle2 size={20} className="text-emerald-400 shrink-0" />
-                  </div>
-                ))}
-              </div>
-            )}
-            
-            <p className="text-zinc-500 text-xs mt-4 text-center">
-              Full picks (market/prediction) are revealed to VIP subscribers only. All results are 100% public on the <Link href="/history" className="text-emerald-400 hover:underline">History</Link> page.
-            </p>
-          </div>
-
-          <BannerWall title="Sponsored" banners={VIP_BANNERS} />
         </div>
-      )}
+      ) : null}
+
+      <div className={`mb-10 md:max-w-3xl md:mx-auto ${isUserVip ? "border-t border-neutral-900 pt-10 md:pt-14" : ""}`}>
+        <div className="flex items-center gap-2 mb-6">
+          <Archive size={18} className="text-zinc-500" />
+          <h2 className="text-xl font-black text-white">Past VIP Tickets</h2>
+        </div>
+
+        {vipArchive.length === 0 ? (
+          <p className="text-center text-neutral-600 text-sm py-5">There are no archived tickets available.</p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {vipArchive.map((tk) => (
+              <div
+                key={tk.id}
+                className="flex items-center justify-between gap-4 bg-zinc-900/40 border border-emerald-500/20 rounded-xl px-4 py-3"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-zinc-500 mb-0.5">
+                    {new Date(tk.matchDate).toLocaleDateString()} • Verified Win
+                  </p>
+                  <p className="text-white font-bold text-sm truncate">{tk.description}</p>
+                </div>
+                <span className="text-white font-bold text-sm shrink-0">@ {tk.totalOdds.toFixed(2)}</span>
+                <CheckCircle2 size={20} className="text-emerald-400 shrink-0" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        <p className="text-zinc-500 text-xs mt-4 text-center">
+          Full picks (market/prediction) are revealed to VIP subscribers only. All results are 100% public on the{" "}
+          <Link href="/history" className="text-emerald-400 hover:underline">History</Link> page.
+        </p>
+      </div>
+
+      {!isUserVip && <BannerWall title="Sponsored" banners={VIP_BANNERS} />}
     </div>
   );
 }

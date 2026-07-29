@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { X, Loader2, CheckCircle2, BellRing } from "lucide-react";
 
-const DELAY_MS = 5000;
+const DELAY_MS = 15000;
 const DISMISS_KEY = "epx_subscribe_toast_dismissed_session";
 const SUBSCRIBED_KEY = "epx_newsletter_subscribed";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.protipsbet.com";

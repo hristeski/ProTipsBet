@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, XCircle, Filter, Archive } from "lucide-react";
 import TipCard from "@/components/TipCard";
 import BannerWall from "@/components/BannerWall";
 import { FREE_TIPS_BANNERS } from "@/lib/banners";
 import { MARKET_LABELS, type Market } from "@/lib/tips-data";
-import { API_BASE, authHeaders } from "@/lib/api";
 import { getTipStatus, formatMatchTime, formatDate } from "@/lib/tip-format";
 
 const FILTERS: { key: Market | "all"; label: string }[] = [
@@ -29,18 +28,9 @@ interface ApiTip {
   isVip: boolean;
 }
 
-export default function FreeTipsClient() {
-  const [tips, setTips] = useState<ApiTip[]>([]);
+export default function FreeTipsClient({ initialTips }: { initialTips: ApiTip[] }) {
+  const [tips] = useState<ApiTip[]>(initialTips);
   const [filter, setFilter] = useState<Market | "all">("all");
-
-  useEffect(() => {
-    const fetchTips = async () => {
-      const res = await fetch(`${API_BASE}/api/tips`, { headers: authHeaders() });
-      const data = await res.json();
-      setTips(Array.isArray(data) ? data : []);
-    };
-    fetchTips();
-  }, []);
 
   const allFreeTips = tips.filter((t) => !t.isVip);
   const activeTips = allFreeTips.filter((t) => getTipStatus(t.result) === "pending");

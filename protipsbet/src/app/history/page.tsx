@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import HistoryClient from "./HistoryClient";
+import { API_BASE } from "@/lib/api";
 
 export const metadata: Metadata = {
   title: "Verified Betting History & Track Record",
@@ -14,6 +15,20 @@ export const metadata: Metadata = {
   },
 };
 
-export default function HistoryPage() {
-  return <HistoryClient />;
+async function getTickets() {
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/archive`, {
+      next: { revalidate: 300 },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+export default async function HistoryPage() {
+  const tickets = await getTickets();
+  return <HistoryClient initialTickets={tickets} />;
 }
