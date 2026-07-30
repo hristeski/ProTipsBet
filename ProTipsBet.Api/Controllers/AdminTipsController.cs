@@ -10,7 +10,7 @@ namespace ProTipsBet.Api.Controllers
 {
     [ApiController]
     [Route("api/admin/tips")]
-    [Authorize(Roles = "Admin")] // FIX: was [Authorize] only — any logged-in user (incl. paying customers) could hit this
+    [Authorize(Roles = "Admin")]
     public class AdminTipsController : ControllerBase
     {
         private readonly AppDbContext _db;
@@ -135,6 +135,53 @@ catch
             return Ok(tip);
         }
 
+        // НОВО: целосна измена на постоечки тип (тимови, датум, коефициент, VIP, публикација, итн.)
+        // За разлика од UpdateResult подолу (кој менува само Win/Loss/Void), овој endpoint
+        // ги презапишува сите полиња на типот одеднаш - тоа е она што го користи Edit копчето.
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateTip(int id, [FromBody] UpdateTipDto request)
+        {
+            var tip = await _db.Tips.FindAsync(id);
+            if (tip == null) return NotFound(new { message = "Типот не е пронајден." });
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            tip.HomeTeam = request.HomeTeam ?? tip.HomeTeam;
+            tip.AwayTeam = request.AwayTeam ?? tip.AwayTeam;
+            tip.League = request.League ?? tip.League;
+            tip.MatchDate = request.MatchDate;
+            tip.PredictionType = request.PredictionType ?? tip.PredictionType;
+            tip.Odds = request.Odds;
+            tip.IsVip = request.IsVip;
+            tip.Analysis = request.Analysis ?? tip.Analysis;
+            tip.IsPublished = request.IsPublished;
+
+            // Опционално менување на резултатот директно од edit формата
+            if (!string.IsNullOrEmpty(request.Result) &&
+                Enum.TryParse<TipResult>(request.Result, true, out var parsedResult))
+            {
+                tip.Result = parsedResult;
+            }
+
+            await _db.SaveChangesAsync();
+
+            return Ok(new TipResponse
+            {
+                Id = tip.Id,
+                HomeTeam = tip.HomeTeam,
+                AwayTeam = tip.AwayTeam,
+                League = tip.League,
+                MatchDate = tip.MatchDate,
+                PredictionType = tip.PredictionType,
+                Odds = tip.Odds,
+                Result = tip.Result.ToString(),
+                IsVip = tip.IsVip,
+                Analysis = tip.Analysis,
+                IsPublished = tip.IsPublished
+            });
+        }
+
         [HttpPut("{id}/result")]
         public async Task<IActionResult> UpdateResult(int id, [FromBody] UpdateResultDto request)
         {
@@ -174,6 +221,21 @@ catch
         public bool IsVip { get; set; }
         public bool IsPublished { get; set; }
         public string? Analysis { get; set; }
+    }
+
+    // НОВО: DTO за UpdateTip - исто како CreateTipDto плус опционален Result
+    public class UpdateTipDto
+    {
+        public string HomeTeam { get; set; } = string.Empty;
+        public string AwayTeam { get; set; } = string.Empty;
+        public string? League { get; set; }
+        public DateTime MatchDate { get; set; }
+        public string PredictionType { get; set; } = string.Empty;
+        public decimal Odds { get; set; }
+        public bool IsVip { get; set; }
+        public bool IsPublished { get; set; }
+        public string? Analysis { get; set; }
+        public string? Result { get; set; } // "Pending" / "Win" / "Loss" / "Void"
     }
 
     public class UpdateResultDto
