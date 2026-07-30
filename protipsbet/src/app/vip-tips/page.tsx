@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   },
 };
 
-async function getMatches() {
+async function getAllTips() {
   try {
     const res = await fetch(`${API_BASE}/api/tips`, { next: { revalidate: 300 } });
     if (!res.ok) return [];
@@ -26,7 +26,7 @@ async function getMatches() {
   }
 }
 
-async function getArchive() {
+async function getTicketsArchive() {
   try {
     const res = await fetch(`${API_BASE}/api/tips/tickets`, { next: { revalidate: 300 } });
     if (!res.ok) return [];
@@ -38,8 +38,18 @@ async function getArchive() {
 }
 
 export default async function VipTipsPage() {
-  const [allTips, vipArchive] = await Promise.all([getMatches(), getArchive()]);
-  const vipMatches = allTips.filter((t: any) => t.isVip && String(t.result).toLowerCase() === "pending");
+  const [allTips, ticketsArchive] = await Promise.all([getAllTips(), getTicketsArchive()]);
 
-  return <VipTipsClient initialVipMatches={vipMatches} initialVipArchive={vipArchive} />;
+  const vips = allTips.filter((t: any) => t.isVip);
+  const vipMatches = vips.filter((t: any) => String(t.result).toLowerCase() === "pending");
+  // Исто како архивата на Free Tips - сите VIP типови што веќе имаат резултат
+  const vipTipsArchive = vips.filter((t: any) => String(t.result).toLowerCase() !== "pending");
+
+  return (
+    <VipTipsClient
+      initialVipMatches={vipMatches}
+      initialVipTipsArchive={vipTipsArchive}
+      initialVipTicketsArchive={ticketsArchive}
+    />
+  );
 }
