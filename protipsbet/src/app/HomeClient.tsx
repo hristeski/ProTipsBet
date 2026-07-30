@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { ArrowRight, ShieldCheck, Zap, TrendingUp, Crown } from "lucide-react";
-import { motion } from "framer-motion";
 import TipCard from "@/components/TipCard";
 import BannerWall from "@/components/BannerWall";
 import FloatingBackground from "@/components/FloatingBackground";
@@ -32,33 +31,36 @@ export default function HomeClient({ initialFreeTips }: { initialFreeTips: ApiTi
   return (
     <div className="w-full bg-zinc-950 text-zinc-50 font-sans">
 
-      {/* 1. HERO - pitch background + floating balls/trophies */}
+      {/* 1. HERO - pitch background + floating balls/trophies
+          Забелешка: без framer-motion овде намерно — hero H1 е дел од LCP
+          (Largest Contentful Paint) метриката, па мора да е веднаш видлив
+          во HTML без да чека JS hydration/animation. */}
       <section className="pitch-lines pitch-circle relative px-6 pt-32 pb-20 text-center min-h-[85vh] flex flex-col justify-center items-center overflow-hidden">
         <FloatingBackground />
         <div className="absolute w-[400px] h-[400px] bg-emerald-500/15 blur-[120px] rounded-full pointer-events-none" />
 
         <div className="relative z-10 max-w-3xl">
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-bold text-emerald-400">
+          <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-bold text-emerald-400">
             <span className="pulse-dot w-1.5 h-1.5 rounded-full bg-emerald-400" />
             99% Win Rate • 124.5 Units Profit This Season
-          </motion.div>
+          </div>
 
-          <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-5xl md:text-7xl font-black mb-6 tracking-tighter">
+          <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tighter">
             Results You Can <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">Trust.</span>
-          </motion.h1>
+          </h1>
 
-          <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-zinc-400 mb-10 text-lg">
+          <p className="text-zinc-400 mb-10 text-lg">
             Every tip goes through statistical analysis before it's published. No results are hidden — everything is 100% verified and public.
-          </motion.p>
+          </p>
 
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/vip-tips" className="px-8 py-4 bg-emerald-500 text-zinc-950 font-black rounded-xl hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 hover:scale-105 active:scale-95">
               VIP Access <Crown size={18} />
             </Link>
             <a href="#free-picks" className="px-8 py-4 bg-zinc-900 border border-zinc-800 text-white font-bold rounded-xl hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2">
               Free Picks <ArrowRight size={18} />
             </a>
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -71,8 +73,11 @@ export default function HomeClient({ initialFreeTips }: { initialFreeTips: ApiTi
         </div>
       </section>
 
-      {/* 3. QUICK FEATURES */}
+      {/* 3. QUICK FEATURES
+          Забелешка: додаден sr-only h2 пред h3-те за да не се прескокнува
+          heading нивото (претходно h1 -> h3 директно, Lighthouse грешка). */}
       <section className="reveal px-6 py-20 max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
+        <h2 className="sr-only">Why Choose ProTipsBet</h2>
         {[
           { title: "Deep Statistical Edge", desc: "Stop relying on luck. Our analytics process thousands of data points to find genuine value bets against the bookmakers.", icon: TrendingUp },
           { title: "Verified Slips", desc: "100% transparent history. We track every win and loss.", icon: ShieldCheck },
@@ -96,7 +101,7 @@ export default function HomeClient({ initialFreeTips }: { initialFreeTips: ApiTi
         <BannerWall title="Sponsored" banners={HOME_BANNERS} />
       </div>
 
-      {/* 5. TODAY'S FREE PICKS — сега SSR, доаѓа веднаш во HTML */}
+      {/* 5. TODAY'S FREE PICKS — SSR, доаѓа веднаш во HTML */}
       <section id="free-picks" className="px-6 pb-24 max-w-4xl mx-auto">
         <div className="text-center mb-10">
           <h2 className="text-3xl font-black text-white mb-2">Today's Free Picks</h2>

@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     description: "Daily football predictions backed by data and a verified track record.",
   },
   robots: { index: true, follow: true },
-  // alternates: { canonical: SITE_URL },
+  alternates: { canonical: SITE_URL },
 };
 
 export default function RootLayout({

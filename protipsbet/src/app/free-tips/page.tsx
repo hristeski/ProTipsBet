@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import FreeTipsClient from "./FreeTipsClient";
+import TipsStructuredData from "@/components/TipsStructuredData";
 import { API_BASE } from "@/lib/api";
 
 export const metadata: Metadata = {
@@ -42,5 +43,14 @@ async function getTips(): Promise<ApiTip[]> {
 
 export default async function FreeTipsPage() {
   const tips = await getTips();
-  return <FreeTipsClient initialTips={tips} />;
+  const pendingFreeTips = tips.filter(
+    (t) => !t.isVip && String(t.result).toLowerCase() === "pending"
+  );
+
+  return (
+    <>
+      <TipsStructuredData tips={pendingFreeTips} />
+      <FreeTipsClient initialTips={tips} />
+    </>
+  );
 }

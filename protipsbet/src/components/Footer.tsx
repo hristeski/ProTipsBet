@@ -31,13 +31,13 @@ export default function Footer() {
               Premium sports analytics and high-confidence betting predictions. We track every ticket to provide 100% verified history and transparency.
             </p>
             <div className="flex items-center gap-4 text-zinc-500">
-              <a href="#" className="hover:text-emerald-400 transition-colors p-2 bg-zinc-900 rounded-lg border border-zinc-800 hover:border-emerald-500/30">
+              <a href="#" aria-label="Twitter" className="hover:text-emerald-400 transition-colors p-2 bg-zinc-900 rounded-lg border border-zinc-800 hover:border-emerald-500/30">
                 <TwitterIcon />
               </a>
-              <a href="#" className="hover:text-emerald-400 transition-colors p-2 bg-zinc-900 rounded-lg border border-zinc-800 hover:border-emerald-500/30">
+              <a href="#" aria-label="Instagram" className="hover:text-emerald-400 transition-colors p-2 bg-zinc-900 rounded-lg border border-zinc-800 hover:border-emerald-500/30">
                 <InstagramIcon />
               </a>
-              <a href="mailto:contact@protipsbet.com" className="hover:text-emerald-400 transition-colors p-2 bg-zinc-900 rounded-lg border border-zinc-800 hover:border-emerald-500/30">
+              <a href="mailto:contact@protipsbet.com" aria-label="Email us" className="hover:text-emerald-400 transition-colors p-2 bg-zinc-900 rounded-lg border border-zinc-800 hover:border-emerald-500/30">
                 <Mail size={18} />
               </a>
             </div>

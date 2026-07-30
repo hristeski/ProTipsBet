@@ -1,9 +1,12 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | ProTipsBet",
+  title: "Terms of Service",
   description: "Read the Terms of Service for ProTipsBet. Understand our guidelines, 18+ age restrictions, and disclaimer regarding sports analytics and betting predictions.",
   keywords: ["Terms of Service", "ProTipsBet terms", "betting rules", "sports analytics disclaimer", "user agreement"],
+  alternates: {
+    canonical: "https://protipsbet.com/terms",
+  },
 };
 
 export default function TermsPage() {

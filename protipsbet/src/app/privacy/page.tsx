@@ -1,9 +1,12 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | ProTipsBet",
+  title: "Privacy Policy",
   description: "Learn how ProTipsBet collects, uses, and protects your personal information. We value your privacy and security.",
   keywords: ["Privacy Policy", "data protection", "ProTipsBet privacy", "GDPR compliance", "user data security"],
+  alternates: {
+    canonical: "https://protipsbet.com/privacy",
+  },
 };
 
 export default function PrivacyPage() {

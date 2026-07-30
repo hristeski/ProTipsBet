@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import HomeClient from "./HomeClient";
+import FAQStructuredData from "@/components/FAQStructuredData";
+import TipsStructuredData from "@/components/TipsStructuredData";
 import { API_BASE } from "@/lib/api";
-
-// Ако веќе имаш export const metadata тука, задржи ја - не ја менувам бидејќи
-// не си ми ја пратил содржината на постоечкиот app/page.tsx метаданите.
 
 interface ApiTip {
   id: number;
@@ -35,5 +34,11 @@ async function getFreeTips(): Promise<ApiTip[]> {
 
 export default async function HomePage() {
   const freeTips = await getFreeTips();
-  return <HomeClient initialFreeTips={freeTips} />;
+  return (
+    <>
+      <FAQStructuredData />
+      <TipsStructuredData tips={freeTips} />
+      <HomeClient initialFreeTips={freeTips} />
+    </>
+  );
 }
