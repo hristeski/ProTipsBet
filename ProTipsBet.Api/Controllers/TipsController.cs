@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProTipsBet.Api.Data;
+using ProTipsBet.Api.Models;
 using System.Security.Claims;
 
 namespace ProTipsBet.Api.Controllers
@@ -41,10 +42,13 @@ namespace ProTipsBet.Api.Controllers
                     Result = t.Result.ToString(),
                     t.IsVip,
                     t.Analysis,
-                    HomeTeam = (t.IsVip && !isVipUser) ? "Locked VIP Match" : t.HomeTeam,
-                    AwayTeam = (t.IsVip && !isVipUser) ? "Locked" : t.AwayTeam,
-                    PredictionType = (t.IsVip && !isVipUser) ? "***" : t.PredictionType,
-                    League = (t.IsVip && !isVipUser) ? "VIP Only" : t.League
+                    // НОВО: заклучувањето важи само додека резултатот е Pending.
+                    // Штом мечот заврши (Win/Loss/Void), пикот станува целосно
+                    // јавен за сите - исто како архивата на Free Tips.
+                    HomeTeam = (t.IsVip && !isVipUser && t.Result == TipResult.Pending) ? "Locked VIP Match" : t.HomeTeam,
+                    AwayTeam = (t.IsVip && !isVipUser && t.Result == TipResult.Pending) ? "Locked" : t.AwayTeam,
+                    PredictionType = (t.IsVip && !isVipUser && t.Result == TipResult.Pending) ? "***" : t.PredictionType,
+                    League = (t.IsVip && !isVipUser && t.Result == TipResult.Pending) ? "VIP Only" : t.League
                 })
                 .ToListAsync();
 
