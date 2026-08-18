@@ -22,7 +22,6 @@ export const ALL_BANNERS: BannerData[] = [
   { id: "05", href: "https://usafixedmatch.com/", videoSrc: "/banners/USA-FIXED-MATCHES.mp4", imgSrc: "/banners/usa fixed matches.webp", alt: "10 teams to win today with big odds", width: 96, height: 32 },
   { id: "06", href: "https://football-fixed-match.com/", videoSrc: "/banners/football-fixed-match.mp4", imgSrc: "/banners/football fixed matches.webp", alt: "Straight win teams today", width: 96, height: 32 },
   { id: "07", href: "https://switzerland-fixedmatches.com/", videoSrc: "/banners/0zEnBwM.mp4", imgSrc: "/banners/switserland fixed matches.webp", alt: "Sure win Teams today correct score", width: 96, height: 32 },
-
   { id: "08", href: "https://japan-fixed.com/", videoSrc: "/banners/prediction-banner-01.mp4", imgSrc: "/banners/prediction-banner-01.webp", alt: "Predictions for today", width: 96, height: 32 },
   { id: "09", href: "https://england-fixedmatches.com/", videoSrc: "/banners/england.mp4", imgSrc: "/banners/england.webp", alt: "Predictions tomorrow", width: 96, height: 32 },
   { id: "10", href: "https://www.correctscore1x2.uk/", videoSrc: "/banners/correctscore1x2.mp4", imgSrc: "/banners/correctscore1x2.webp", alt: "King of correct score", width: 96, height: 32 },
@@ -54,7 +53,7 @@ export const ALL_BANNERS: BannerData[] = [
 
 // Distributed across pages - a few everywhere, not all in one place
 export const HOME_BANNERS = ALL_BANNERS.slice(0, 20);
-export const FREE_TIPS_BANNERS = ALL_BANNERS.slice(20, 33);
-// export const VIP_BANNERS = ALL_BANNERS.slice(16, 21);
-// export const HISTORY_BANNERS = ALL_BANNERS.slice(21, 26);
+export const FREE_TIPS_BANNERS = ALL_BANNERS.slice(20, 30);
+export const VIP_BANNERS = ALL_BANNERS.slice(30, 31);
+export const HISTORY_BANNERS = ALL_BANNERS.slice(31, 33);
 // export const FOOTER_BANNERS = ALL_BANNERS.slice(15, 21);
