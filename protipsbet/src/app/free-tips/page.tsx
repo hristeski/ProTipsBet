@@ -31,7 +31,7 @@ interface ApiTip {
 async function getTips(): Promise<ApiTip[]> {
   try {
     const res = await fetch(`${API_BASE}/api/tips`, {
-      next: { revalidate: 300 }, // ISR - освежи на секои 5 мин
+      next: { revalidate: 60 }, // ISR - освежи на секои 5 мин
     });
     if (!res.ok) return [];
     const data = await res.json();

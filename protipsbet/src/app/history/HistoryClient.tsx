@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { CheckCircle, TrendingUp, ImageIcon, Trophy, Calendar, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import BannerWall from "@/components/BannerWall";
@@ -8,9 +8,30 @@ import { HISTORY_BANNERS } from "@/lib/banners";
 import { API_BASE } from "@/lib/api";
 
 export default function HistoryClient({ initialTickets }: { initialTickets: any[] }) {
-  const [tickets] = useState<any[]>(initialTickets);
+  const [tickets, setTickets] = useState<any[]>(initialTickets);
   const [filter, setFilter] = useState<"all" | "vip" | "premium" | "correct score">("all");
   const [openImage, setOpenImage] = useState<string | null>(null);
+
+  const refetchTickets = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/archive`, { cache: "no-store" });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (Array.isArray(data)) setTickets(data);
+    } catch {
+      // тивко fail
+    }
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(refetchTickets, 60000);
+    const onFocus = () => refetchTickets();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [refetchTickets]);
 
   const filtered = tickets.filter((t) => {
     if (filter === "all") return true;

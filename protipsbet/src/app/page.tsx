@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import HomeClient from "./HomeClient";
 import FAQStructuredData from "@/components/FAQStructuredData";
 import TipsStructuredData from "@/components/TipsStructuredData";
+import ReviewStructuredData from "@/components/ReviewStructuredData";
+import ConfidenceStatsBar from "@/components/ConfidenceStatsBar";
+import WinningTicketsGallery from "@/components/WinningTicketsGallery";
 import { API_BASE } from "@/lib/api";
 
 interface ApiTip {
@@ -19,7 +22,7 @@ interface ApiTip {
 async function getFreeTips(): Promise<ApiTip[]> {
   try {
     const res = await fetch(`${API_BASE}/api/tips`, {
-      next: { revalidate: 300 },
+      next: { revalidate: 60 }, //osvezhi na sekoi 60 sekundi
     });
     if (!res.ok) return [];
     const data = await res.json();
@@ -34,11 +37,17 @@ async function getFreeTips(): Promise<ApiTip[]> {
 
 export default async function HomePage() {
   const freeTips = await getFreeTips();
+
   return (
     <>
       <FAQStructuredData />
       <TipsStructuredData tips={freeTips} />
-      <HomeClient initialFreeTips={freeTips} />
+      <ReviewStructuredData />
+      <HomeClient
+        initialFreeTips={freeTips}
+        confidenceBar={<ConfidenceStatsBar />}
+        winningGallery={<WinningTicketsGallery />}
+      />
     </>
   );
 }

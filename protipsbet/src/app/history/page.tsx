@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 async function getTickets() {
   try {
     const res = await fetch(`${API_BASE}/api/admin/archive`, {
-      next: { revalidate: 300 },
+      next: { revalidate: 60 },//osvezhi na sekoi 60 sekundi
     });
     if (!res.ok) return [];
     const data = await res.json();

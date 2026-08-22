@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 async function getAllTips() {
   try {
-    const res = await fetch(`${API_BASE}/api/tips`, { next: { revalidate: 300 } });
+    const res = await fetch(`${API_BASE}/api/tips`, { next: { revalidate: 60 } }); //osvezhi na sekoi 60 sekundi
     if (!res.ok) return [];
     const data = await res.json();
     return Array.isArray(data) ? data : [];

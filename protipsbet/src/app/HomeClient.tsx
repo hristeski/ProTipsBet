@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { ArrowRight, ShieldCheck, Zap, TrendingUp, Crown } from "lucide-react";
 import TipCard from "@/components/TipCard";
 import BannerWall from "@/components/BannerWall";
@@ -24,7 +25,13 @@ interface ApiTip {
   isVip: boolean;
 }
 
-export default function HomeClient({ initialFreeTips }: { initialFreeTips: ApiTip[] }) {
+interface Props {
+  initialFreeTips: ApiTip[];
+  confidenceBar?: ReactNode;
+  winningGallery?: ReactNode;
+}
+
+export default function HomeClient({ initialFreeTips, confidenceBar, winningGallery }: Props) {
   const partners = ["BET365", "PINNACLE", "SOFASCORE", "1XBET", "BINANCE PAY", "SKRILL"];
   const freeTips = initialFreeTips;
 
@@ -64,6 +71,9 @@ export default function HomeClient({ initialFreeTips }: { initialFreeTips: ApiTi
         </div>
       </section>
 
+      {/* 1.5 CONFIDENCE STATS BAR - жива статистика, веднаш по hero */}
+      {confidenceBar}
+
       {/* 2. PARTNERS MARQUEE */}
       <section className="py-4 border-y border-zinc-900 bg-zinc-950/80 overflow-hidden">
         <div className="flex animate-marquee gap-12 pl-12">
@@ -95,6 +105,9 @@ export default function HomeClient({ initialFreeTips }: { initialFreeTips: ApiTi
 
       {/* 4. WIN RATE TABLE */}
       <WinRateTable />
+
+      {/* 4.5 VERIFIED WINS PORTFOLIO - галерија на реални тикети, докажи пред да прикажеш денешни пикови */}
+      {winningGallery}
 
       {/* Banner slots #1-8 */}
       <div className="px-6 max-w-5xl mx-auto">

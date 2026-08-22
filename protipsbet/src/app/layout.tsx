@@ -6,6 +6,7 @@ import MobileNav from "@/components/BottomNav";
 import ScrollToTop from "@/components/ScrollToTop";
 import NotificationToast from "@/components/NotificationToast";
 import StructuredData from "@/components/StructuredData";
+import OrganizationStructuredData from "@/components/OrganizationStructuredData";
 import Footer from "@/components/Footer";
 import HelpButton from "@/components/HelpButton";
 import MobileTopBar from "@/components/MobileTopBar";
@@ -58,6 +59,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} bg-zinc-950 text-zinc-50 antialiased selection:bg-emerald-500/30 selection:text-emerald-200`}>
         <StructuredData />
+        <OrganizationStructuredData />
 
         {/* Desktop nav (hidden on mobile) */}
         <Navbar />

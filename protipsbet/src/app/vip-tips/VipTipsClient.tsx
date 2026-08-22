@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { ShieldCheck, Archive, CheckCircle2, XCircle, Crown, Loader2 } from "lucide-react";
 import TipCard from "@/components/TipCard";
 import BannerWall from "@/components/BannerWall";
@@ -9,12 +9,13 @@ import PricingPlans from "@/components/PricingPlans";
 import { VIP_BANNERS } from "@/lib/banners";
 import { CRYPTO_MIN_NOTE } from "@/lib/pricing";
 import { getTipStatus, formatDate } from "@/lib/tip-format";
+import { buildSlug } from "@/lib/prediction-slug";
 import { API_BASE, authHeaders } from "@/lib/api";
 
 interface Props {
   initialVipMatches: any[];
-  initialVipTipsArchive: any[]; // завршени VIP типови (Win/Loss) - серверски вчитано
-  initialVipTicketsArchive: any[]; // upload-нати winning ticket слики - серверски вчитано
+  initialVipTipsArchive: any[];
+  initialVipTicketsArchive: any[];
 }
 
 export default function VipTipsClient({
@@ -23,43 +24,90 @@ export default function VipTipsClient({
   initialVipTicketsArchive,
 }: Props) {
   const [vipMatches, setVipMatches] = useState<any[]>(initialVipMatches);
-  const [vipTipsArchive] = useState<any[]>(initialVipTipsArchive);
-  const [vipTicketsArchive] = useState<any[]>(initialVipTicketsArchive);
+  const [vipTipsArchive, setVipTipsArchive] = useState<any[]>(initialVipTipsArchive);
+  const [vipTicketsArchive, setVipTicketsArchive] = useState<any[]>(initialVipTicketsArchive);
   const [checkingVip, setCheckingVip] = useState(true);
   const [isUserVip, setIsUserVip] = useState(false);
 
-  // Server-делот секогаш враќа заклучена верзија (безбедно за SEO/анонимни).
-  // Тука, ако постои токен, повторно fetch-ame со Authorization за да ги
-  // "отклучиме" вистинските мечеви за платениот корисник.
-  useEffect(() => {
+  const unlockIfVip = useCallback(async () => {
     const token = localStorage.getItem("protipsbet_token");
     if (!token) {
       setCheckingVip(false);
       return;
     }
 
-    const unlockIfVip = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/api/tips`, { headers: authHeaders() });
-        if (res.ok) {
-          const data = await res.json();
-          const vips = data.filter((t: any) => t.isVip);
-          const pendingVips = vips.filter((t: any) => getTipStatus(t.result) === "pending");
+    try {
+      const res = await fetch(`${API_BASE}/api/tips`, { headers: authHeaders(), cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        const vips = data.filter((t: any) => t.isVip);
+        const pendingVips = vips.filter((t: any) => getTipStatus(t.result) === "pending");
 
-          if (vips.length > 0 && vips[0].homeTeam !== "Locked VIP Match") {
-            setIsUserVip(true);
-            setVipMatches(pendingVips);
+        if (vips.length > 0 && vips[0].homeTeam !== "Locked VIP Match") {
+          setIsUserVip(true);
+          setVipMatches(pendingVips);
+        }
+      }
+    } catch (err) {
+      console.error("Грешка при отклучување на VIP:", err);
+    } finally {
+      setCheckingVip(false);
+    }
+  }, []);
+
+  const refetchArchives = useCallback(async () => {
+    try {
+      const [tipsRes, ticketsRes] = await Promise.all([
+        fetch(`${API_BASE}/api/tips`, { cache: "no-store" }),
+        fetch(`${API_BASE}/api/tips/tickets`, { cache: "no-store" }),
+      ]);
+
+      if (tipsRes.ok) {
+        const allTips = await tipsRes.json();
+        if (Array.isArray(allTips)) {
+          const vips = allTips.filter((t: any) => t.isVip);
+          const archive = vips.filter((t: any) => String(t.result).toLowerCase() !== "pending");
+          setVipTipsArchive(archive);
+
+          if (!isUserVip) {
+            const pending = vips.filter((t: any) => String(t.result).toLowerCase() === "pending");
+            setVipMatches(pending);
           }
         }
-      } catch (err) {
-        console.error("Грешка при отклучување на VIP:", err);
-      } finally {
-        setCheckingVip(false);
       }
-    };
 
+      if (ticketsRes.ok) {
+        const allTickets = await ticketsRes.json();
+        if (Array.isArray(allTickets)) {
+          setVipTicketsArchive(allTickets.filter((t: any) => t.isVip));
+        }
+      }
+    } catch {
+      // тивко fail
+    }
+  }, [isUserVip]);
+
+  useEffect(() => {
     unlockIfVip();
-  }, []);
+  }, [unlockIfVip]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetchArchives();
+      if (isUserVip) unlockIfVip();
+    }, 60000);
+
+    const onFocus = () => {
+      refetchArchives();
+      if (isUserVip) unlockIfVip();
+    };
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [refetchArchives, unlockIfVip, isUserVip]);
 
   const formatMatchTime = (value?: string) => {
     if (!value) return "TBD";
@@ -85,7 +133,6 @@ export default function VipTipsClient({
         </span>
       </div>
 
-      {/* ДЕНЕШНИ VIP ПИКОВИ (pending) */}
       <div className="mb-12 md:mb-16">
         <div className="flex items-center justify-between mb-4 md:hidden">
           <h2 className="font-bold text-lg text-white">Today's Premium Picks</h2>
@@ -121,7 +168,6 @@ export default function VipTipsClient({
         )}
       </div>
 
-      {/* PRICING - само за не-VIP посетители, откако е потврдено статусот */}
       {checkingVip ? (
         <div className="flex justify-center py-6">
           <Loader2 className="animate-spin text-neutral-600" size={20} />
@@ -157,7 +203,6 @@ export default function VipTipsClient({
         </div>
       ) : null}
 
-      {/* АРХИВА НА ЗАВРШЕНИ VIP ПИКОВИ - исто како Free Tips архивата (Win/Loss листа) */}
       <div className="mb-10 md:max-w-3xl md:mx-auto">
         <div className="flex items-center gap-2 mb-6">
           <Archive size={18} className="text-zinc-500" />
@@ -169,9 +214,10 @@ export default function VipTipsClient({
         ) : (
           <div className="flex flex-col gap-3">
             {vipTipsArchive.map((tip) => (
-              <div
+              <Link
                 key={tip.id}
-                className={`flex items-center justify-between gap-4 bg-zinc-900/40 border rounded-xl px-4 py-3 ${
+                href={`/predictions/${buildSlug(tip)}`}
+                className={`flex items-center justify-between gap-4 bg-zinc-900/40 border rounded-xl px-4 py-3 hover:bg-zinc-900/70 transition-colors ${
                   getTipStatus(tip.result) === "win" ? "border-emerald-500/20" : "border-red-500/20"
                 }`}
               >
@@ -190,13 +236,12 @@ export default function VipTipsClient({
                 ) : (
                   <XCircle size={20} className="text-red-400 shrink-0" />
                 )}
-              </div>
+              </Link>
             ))}
           </div>
         )}
       </div>
 
-      {/* АРХИВА НА UPLOAD-НАТИ WINNING TICKET СЛИКИ */}
       <div className="mb-10 md:max-w-3xl md:mx-auto">
         <div className="flex items-center gap-2 mb-6">
           <Archive size={18} className="text-zinc-500" />
