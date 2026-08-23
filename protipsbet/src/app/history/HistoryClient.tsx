@@ -1,7 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { CheckCircle, TrendingUp, ImageIcon, Trophy, Calendar, X } from "lucide-react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { 
+  CheckCircle, TrendingUp, ImageIcon, Trophy, 
+  Calendar, X, Search, ArrowUpDown, FilterX 
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import BannerWall from "@/components/BannerWall";
 import { HISTORY_BANNERS } from "@/lib/banners";
@@ -10,6 +13,8 @@ import { API_BASE } from "@/lib/api";
 export default function HistoryClient({ initialTickets }: { initialTickets: any[] }) {
   const [tickets, setTickets] = useState<any[]>(initialTickets);
   const [filter, setFilter] = useState<"all" | "vip" | "premium" | "correct score">("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "highest_odds">("newest");
   const [openImage, setOpenImage] = useState<string | null>(null);
 
   const refetchTickets = useCallback(async () => {
@@ -19,7 +24,7 @@ export default function HistoryClient({ initialTickets }: { initialTickets: any[
       const data = await res.json();
       if (Array.isArray(data)) setTickets(data);
     } catch {
-      // тивко fail
+      // Silent fail
     }
   }, []);
 
@@ -33,166 +38,271 @@ export default function HistoryClient({ initialTickets }: { initialTickets: any[
     };
   }, [refetchTickets]);
 
-  const filtered = tickets.filter((t) => {
-    if (filter === "all") return true;
+  // Филтрирање, Пребарување и Сортирање (UseMemo за подобри перформанси)
+  const processedTickets = useMemo(() => {
+    let result = tickets.filter((t) => {
+      const desc = (t.description || "").toLowerCase();
+      
+      // 1. Категорија филтер
+      let matchesFilter = true;
+      if (filter === "vip") matchesFilter = desc.includes("vip") || t.isVip;
+      if (filter === "premium") matchesFilter = desc.includes("premium");
+      if (filter === "correct score") matchesFilter = desc.includes("correct score") || desc.includes("cs");
 
-    const desc = (t.description || "").toLowerCase();
+      // 2. Search филтер (пребарува во опис и во тимови)
+      const search = searchQuery.toLowerCase();
+      const matchesSearch = search === "" || 
+        desc.includes(search) || 
+        t.legs?.some((leg: any) => 
+          leg.homeTeam.toLowerCase().includes(search) || 
+          leg.awayTeam.toLowerCase().includes(search)
+        );
 
-    if (filter === "vip") return desc.includes("vip") || t.isVip;
-    if (filter === "premium") return desc.includes("premium");
-    if (filter === "correct score") return desc.includes("correct score") || desc.includes("cs");
+      return matchesFilter && matchesSearch;
+    });
 
-    return true;
-  });
+    // 3. Сортирање
+    return result.sort((a, b) => {
+      const dateA = new Date(a.matchDate).getTime();
+      const dateB = new Date(b.matchDate).getTime();
+      
+      if (sortBy === "newest") return dateB - dateA;
+      if (sortBy === "oldest") return dateA - dateB;
+      if (sortBy === "highest_odds") return b.totalOdds - a.totalOdds;
+      return 0;
+    });
+  }, [tickets, filter, searchQuery, sortBy]);
 
   const totalProfit = tickets.reduce((acc, t) => acc + (t.totalOdds > 0 ? t.totalOdds - 1 : 0), 0).toFixed(2);
 
   const getBadge = (desc: string, isVip: boolean) => {
     const d = (desc || "").toLowerCase();
-    if (d.includes("correct score") || d.includes("cs")) return { label: "CORRECT SCORE", color: "bg-purple-500" };
-    if (d.includes("premium")) return { label: "PREMIUM", color: "bg-blue-500" };
-    if (isVip || d.includes("vip")) return { label: "VIP", color: "bg-amber-500" };
-    return { label: "WINNER", color: "bg-emerald-500" };
+    if (d.includes("correct score") || d.includes("cs")) return { label: "CORRECT SCORE", color: "bg-purple-500 text-white" };
+    if (d.includes("premium")) return { label: "PREMIUM", color: "bg-blue-500 text-white" };
+    if (isVip || d.includes("vip")) return { label: "VIP", color: "bg-amber-500 text-black" };
+    return { label: "WINNER", color: "bg-emerald-500 text-black" };
   };
 
   return (
     <div className="pb-24 px-4 sm:px-6 pt-24 md:pt-32 max-w-7xl mx-auto min-h-screen relative">
-      <div className="mb-10 text-center md:text-left flex flex-col md:flex-row justify-between gap-8 items-end border-b border-neutral-800 pb-10">
+      {/* Header Stats */}
+      <div className="mb-10 text-center md:text-left flex flex-col lg:flex-row justify-between gap-8 items-end border-b border-neutral-800 pb-10">
         <div className="max-w-2xl">
           <h1 className="text-4xl md:text-5xl font-black text-white mb-4 uppercase tracking-tight">
             Verified <span className="text-emerald-500">History</span>
           </h1>
-          <p className="text-neutral-400 text-lg">
+          <p className="text-neutral-400 text-lg leading-relaxed">
             100% transparent track record. Every single match, tip, and odd is publicly verified. We let our results speak for us.
           </p>
         </div>
 
-        <div className="flex gap-4 w-full md:w-auto">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 flex-1 md:w-48 text-center md:text-left shadow-lg">
-            <p className="text-neutral-500 text-xs font-bold uppercase mb-1 flex items-center justify-center md:justify-start gap-1">
-              <TrendingUp size={14} className="text-emerald-500" /> Units Profit
+        <div className="flex gap-4 w-full lg:w-auto">
+          <div className="bg-neutral-900/80 backdrop-blur-sm border border-neutral-800 rounded-2xl p-5 flex-1 md:w-48 shadow-lg hover:border-emerald-500/30 transition-colors">
+            <p className="text-neutral-500 text-xs font-bold uppercase mb-2 flex items-center justify-center lg:justify-start gap-1.5">
+              <TrendingUp size={16} className="text-emerald-500" /> Units Profit
             </p>
-            <p className="text-3xl font-black text-white">+{totalProfit}</p>
+            <p className="text-3xl font-black text-white text-center lg:text-left">+{totalProfit}</p>
           </div>
-          <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 flex-1 md:w-48 text-center md:text-left shadow-lg">
-            <p className="text-neutral-500 text-xs font-bold uppercase mb-1 flex items-center justify-center md:justify-start gap-1">
-              <CheckCircle size={14} className="text-emerald-500" /> Win Rate
+          <div className="bg-neutral-900/80 backdrop-blur-sm border border-neutral-800 rounded-2xl p-5 flex-1 md:w-48 shadow-lg hover:border-emerald-500/30 transition-colors">
+            <p className="text-neutral-500 text-xs font-bold uppercase mb-2 flex items-center justify-center lg:justify-start gap-1.5">
+              <CheckCircle size={16} className="text-emerald-500" /> Win Rate
             </p>
-            <p className="text-3xl font-black text-white">100%</p>
+            <p className="text-3xl font-black text-white text-center lg:text-left">100%</p>
           </div>
         </div>
       </div>
 
-      <div className="flex justify-center md:justify-start gap-2 md:gap-3 mb-10 flex-wrap">
-        {(["all", "vip", "premium", "correct score"] as const).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-5 py-2.5 rounded-lg text-sm font-black transition-all uppercase tracking-wide ${
-              filter === f
-                ? "bg-emerald-500 text-neutral-950 shadow-[0_0_15px_rgba(16,185,129,0.3)]"
-                : "bg-neutral-900 text-neutral-400 hover:bg-neutral-800 hover:text-white border border-neutral-800"
-            }`}
+      {/* Control Panel (Filters, Search, Sort) */}
+      <div className="flex flex-col md:flex-row justify-between gap-4 mb-10 bg-neutral-900/50 p-4 rounded-2xl border border-neutral-800/50">
+        <div className="flex gap-2 flex-wrap">
+          {(["all", "vip", "premium", "correct score"] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all uppercase tracking-wide ${
+                filter === f
+                  ? "bg-emerald-500 text-neutral-950 shadow-[0_0_20px_rgba(16,185,129,0.3)] scale-105"
+                  : "bg-neutral-950 text-neutral-400 hover:bg-neutral-800 hover:text-white border border-neutral-800"
+              }`}
+            >
+              {f === "all" ? "All" : f}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          {/* Search Input */}
+          <div className="relative group flex-1 sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-emerald-500 transition-colors" size={18} />
+            <input
+              type="text"
+              placeholder="Search teams or tips..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-neutral-950 border border-neutral-800 text-white rounded-xl py-2.5 pl-10 pr-4 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-neutral-600"
+            />
+          </div>
+
+          {/* Sort Dropdown */}
+          <div className="relative group">
+            <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" size={18} />
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="w-full bg-neutral-950 border border-neutral-800 text-white rounded-xl py-2.5 pl-10 pr-8 appearance-none focus:outline-none focus:border-emerald-500 transition-all cursor-pointer"
+            >
+              <option value="newest">Newest First</option>
+              <option value="highest_odds">Highest Odds</option>
+              <option value="oldest">Oldest First</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Grid на тикети */}
+      {processedTickets.length > 0 ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <AnimatePresence mode="popLayout">
+            {processedTickets.map((ticket) => {
+              const badge = getBadge(ticket.description, ticket.isVip);
+
+              return (
+                <motion.div
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }} 
+                  animate={{ opacity: 1, scale: 1 }} 
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.2 }}
+                  key={ticket.id}
+                  className="bg-neutral-950/80 backdrop-blur-sm border border-neutral-800 rounded-2xl overflow-hidden flex flex-col relative shadow-2xl hover:border-neutral-700 transition-colors"
+                >
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10rem] font-black text-emerald-500/5 rotate-[-15deg] pointer-events-none select-none">
+                    WON
+                  </div>
+
+                  <div className="p-6 border-b border-neutral-800 bg-neutral-900/30 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 relative z-10">
+                    <div className="flex-1">
+                      <div className="flex flex-wrap items-center gap-3 mb-3">
+                        <span className={`${badge.color} px-2.5 py-1 rounded text-[11px] font-black uppercase flex items-center gap-1.5 shadow-sm`}>
+                          <Trophy size={12}/> {badge.label}
+                        </span>
+                        <span className="bg-neutral-900 border border-neutral-800 text-neutral-400 px-2.5 py-1 rounded text-[11px] font-bold flex items-center gap-1.5">
+                          <Calendar size={12}/> {new Date(ticket.matchDate).toLocaleDateString('en-GB')}
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-black text-white leading-snug">{ticket.description}</h3>
+                    </div>
+                    
+                    <div className="flex flex-col items-start sm:items-end bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-5 py-3 self-start sm:self-auto min-w-[120px]">
+                      <p className="text-emerald-500 text-[10px] font-black uppercase tracking-widest mb-1">Total Odds</p>
+                      <p className="text-3xl font-black text-white">@{ticket.totalOdds}</p>
+                    </div>
+                  </div>
+
+                  <div className="p-6 flex-grow relative z-10">
+                    {ticket.legs && ticket.legs.length > 0 ? (
+                      <div className="w-full">
+                        <div className="grid grid-cols-12 gap-2 text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-3 pb-2 border-b border-neutral-800/50">
+                          <div className="col-span-6">Match</div>
+                          <div className="col-span-3 text-center">Tip</div>
+                          <div className="col-span-3 text-right">Odds</div>
+                        </div>
+
+                        <div className="space-y-2">
+                          {ticket.legs.map((leg: any, i: number) => (
+                            <div key={i} className="grid grid-cols-12 gap-2 items-center bg-neutral-900/40 p-3 rounded-xl border border-neutral-800/50 hover:bg-neutral-800/60 transition-colors">
+                              <div className="col-span-6">
+                                <p className="text-white font-bold text-sm truncate">{leg.homeTeam}</p>
+                                <p className="text-neutral-400 font-medium text-xs mt-0.5 truncate">{leg.awayTeam}</p>
+                              </div>
+                              <div className="col-span-3 flex justify-center">
+                                <span className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-black text-xs px-2 py-1.5 rounded w-full text-center truncate">
+                                  {leg.prediction}
+                                </span>
+                              </div>
+                              <div className="col-span-3 text-right">
+                                <span className="text-white font-bold text-sm">@{leg.odds}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="py-10 flex flex-col items-center justify-center text-neutral-600 gap-2">
+                        <div className="w-12 h-12 rounded-full bg-neutral-900 flex items-center justify-center mb-2">
+                          <Trophy size={20} className="text-neutral-700" />
+                        </div>
+                        <p className="font-medium text-sm">Single match or no breakdown available.</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-4 border-t border-neutral-800 bg-neutral-950 relative z-10 mt-auto">
+                    <button
+                      onClick={() => setOpenImage(`${API_BASE}${ticket.imageUrl}`)}
+                      className="w-full group flex items-center justify-center gap-2 text-sm font-bold text-neutral-400 hover:text-white py-3 hover:bg-neutral-900 rounded-xl transition-all uppercase"
+                    >
+                      <ImageIcon size={18} className="text-neutral-600 group-hover:text-emerald-500 transition-colors"/>
+                      View Original Ticket
+                    </button>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </div>
+      ) : (
+        /* Empty State */
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          className="py-20 flex flex-col items-center justify-center text-center bg-neutral-900/20 rounded-3xl border border-neutral-800/50 border-dashed"
+        >
+          <div className="w-20 h-20 bg-neutral-900 rounded-full flex items-center justify-center mb-6">
+            <FilterX size={32} className="text-neutral-600" />
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">No tickets found</h3>
+          <p className="text-neutral-500 max-w-sm">
+            We couldn't find any tickets matching your current filters or search query.
+          </p>
+          <button 
+            onClick={() => { setFilter("all"); setSearchQuery(""); }}
+            className="mt-6 px-6 py-2.5 bg-neutral-800 text-white font-bold rounded-xl hover:bg-neutral-700 transition-colors"
           >
-            {f === "all" ? "All Tickets" : f}
+            Clear All Filters
           </button>
-        ))}
-      </div>
+        </motion.div>
+      )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <AnimatePresence>
-          {filtered.map((ticket) => {
-            const badge = getBadge(ticket.description, ticket.isVip);
-
-            return (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
-                key={ticket.id}
-                className="bg-[#0a0a0a] border border-neutral-800 rounded-2xl overflow-hidden flex flex-col relative shadow-xl"
-              >
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-9xl font-black text-emerald-500/5 rotate-[-15deg] pointer-events-none select-none">
-                  WON
-                </div>
-
-                <div className="p-5 border-b border-neutral-800 bg-neutral-900/50 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 relative z-10">
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-2 mb-3">
-                      <span className={`${badge.color} text-black px-2.5 py-1 rounded text-xs font-black uppercase flex items-center gap-1.5`}>
-                        <Trophy size={12}/> {badge.label}
-                      </span>
-                      <span className="text-neutral-500 text-xs font-bold flex items-center gap-1.5">
-                        <Calendar size={12}/> {new Date(ticket.matchDate).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-black text-white leading-snug">{ticket.description}</h3>
-                  </div>
-                  <div className="text-left sm:text-right bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-4 py-2.5 self-start sm:self-auto">
-                    <p className="text-emerald-500 text-xs font-black uppercase tracking-wider mb-1">Total Odds</p>
-                    <p className="text-2xl font-black text-white">@{ticket.totalOdds}</p>
-                  </div>
-                </div>
-
-                <div className="p-5 flex-grow relative z-10">
-                  {ticket.legs && ticket.legs.length > 0 ? (
-                    <div className="w-full">
-                      <div className="grid grid-cols-12 gap-2 text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3 pb-2 border-b border-neutral-800/50">
-                        <div className="col-span-6">Match</div>
-                        <div className="col-span-3 text-center">Tip</div>
-                        <div className="col-span-3 text-right">Odds</div>
-                      </div>
-
-                      <div className="space-y-3">
-                        {ticket.legs.map((leg: any, i: number) => (
-                          <div key={i} className="grid grid-cols-12 gap-2 items-center bg-neutral-900/30 p-2.5 rounded-lg border border-neutral-800/50 hover:bg-neutral-900 transition-colors">
-                            <div className="col-span-6">
-                              <p className="text-white font-bold text-sm truncate">{leg.homeTeam}</p>
-                              <p className="text-neutral-400 font-medium text-sm truncate">{leg.awayTeam}</p>
-                            </div>
-                            <div className="col-span-3 flex justify-center">
-                              <span className="bg-emerald-500/20 text-emerald-400 font-black text-sm px-3 py-1 rounded w-full text-center">
-                                {leg.prediction}
-                              </span>
-                            </div>
-                            <div className="col-span-3 text-right">
-                              <span className="text-white font-bold">@{leg.odds}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="py-8 text-center text-neutral-600 font-medium">
-                      No match breakdown available.
-                    </div>
-                  )}
-                </div>
-
-                <div className="p-4 border-t border-neutral-800 bg-neutral-950/50 relative z-10">
-                  <button
-                    onClick={() => setOpenImage(`${API_BASE}${ticket.imageUrl}`)}
-                    className="w-full flex items-center justify-center gap-2 text-sm font-bold text-neutral-400 hover:text-white py-2 hover:bg-neutral-900 rounded-lg transition-all uppercase"
-                  >
-                    <ImageIcon size={16} className="text-emerald-500"/>
-                    VIEW TICKET
-                  </button>
-                </div>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
-      </div>
-
+      {/* Image Modal */}
       <AnimatePresence>
         {openImage && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setOpenImage(null)} className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-            <button className="absolute top-6 right-6 text-white bg-neutral-800 p-2 rounded-full hover:bg-neutral-700 transition-colors"><X size={24}/></button>
-            {/* eslint-disable-next-line */}
-            <img src={openImage} className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-neutral-800" alt="Winning Ticket Proof" />
+          <motion.div 
+            initial={{ opacity: 0, backdropFilter: "blur(0px)" }} 
+            animate={{ opacity: 1, backdropFilter: "blur(8px)" }} 
+            exit={{ opacity: 0, backdropFilter: "blur(0px)" }} 
+            onClick={() => setOpenImage(null)} 
+            className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 sm:p-8"
+          >
+            <motion.button 
+              initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
+              className="absolute top-6 right-6 z-[101] text-white bg-neutral-800/80 hover:bg-neutral-700 p-3 rounded-full backdrop-blur-sm transition-colors"
+            >
+              <X size={24}/>
+            </motion.button>
+            <motion.img 
+              initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0 }}
+              src={openImage} 
+              className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-[0_0_50px_rgba(16,185,129,0.15)] border border-neutral-800" 
+              alt="Winning Ticket Proof" 
+              onClick={(e) => e.stopPropagation()} // Спречува затворање при клик на самата слика
+            />
           </motion.div>
         )}
       </AnimatePresence>
 
-      <BannerWall title="Sponsored" banners={HISTORY_BANNERS} />
+      <div className="mt-20">
+        <BannerWall title="Sponsored" banners={HISTORY_BANNERS} />
+      </div>
     </div>
   );
 }

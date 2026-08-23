@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Crown, User } from "lucide-react";
 
-// Кастом нацртана уникатна спортска топка (Фудбал)
 const SoccerBallIcon = ({ size = 24, className = "" }) => (
   <svg 
     xmlns="http://www.w3.org/2000/svg" 
@@ -35,7 +34,6 @@ export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    // Re-check on every route change too, in case they just logged in/out
     setIsLoggedIn(!!window.localStorage.getItem("protipsbet_token"));
   }, [pathname]);
 
@@ -43,6 +41,7 @@ export default function Navbar() {
     { href: "/", label: "Home" },
     { href: "/free-tips", label: "Free Picks" },
     { href: "/vip-tips", label: "VIP" },
+    { href: "/leagues", label: "Leagues" },
     { href: "/history", label: "History" },
     { href: "/contact", label: "Contact" },
   ];
@@ -51,7 +50,6 @@ export default function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 hidden md:block bg-zinc-950/80 backdrop-blur-xl border-b border-white/5">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
 
-        {/* Уникатно Лого */}
         <Link href="/" className="flex items-center gap-2.5 group">
           <div className="relative flex items-center justify-center bg-gradient-to-br from-emerald-400 to-emerald-600 p-2 rounded-xl group-hover:rotate-12 transition-transform duration-300 shadow-[0_0_15px_rgba(16,185,129,0.4)]">
             <SoccerBallIcon size={22} className="text-zinc-950" />
@@ -61,7 +59,6 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Links */}
         <div className="flex items-center gap-8">
           {links.map((link) => (
             <Link
@@ -89,7 +86,6 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* CTA Button */}
         <Link
           href="/vip-tips"
           className="flex items-center gap-2 px-5 py-2.5 bg-white text-zinc-950 font-black rounded-full hover:bg-zinc-200 transition-all hover:scale-105 active:scale-95 shadow-md"

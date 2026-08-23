@@ -1,12 +1,5 @@
 import Link from "next/link";
-import { Mail, ShieldAlert } from "lucide-react";
-
-// Директни SVG икони за да не зависиме од надворешни пакети за брендови
-const TwitterIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/>
-  </svg>
-);
+import { Mail, ShieldAlert, Send, MessageCircle } from "lucide-react";
 
 const InstagramIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -16,13 +9,15 @@ const InstagramIcon = () => (
   </svg>
 );
 
+const TELEGRAM_URL = "https://t.me/protipsbet11";
+const WHATSAPP_URL = "https://api.whatsapp.com/send/?phone=38978231801&text&type=phone_number&app_absent=0";
+
 export default function Footer() {
   return (
     <footer className="bg-zinc-950 border-t border-zinc-800 pt-16 pb-8 mt-20">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-12 mb-16">
           
-          {/* Бренд Инфо */}
           <div className="md:col-span-1">
             <Link href="/" className="text-2xl font-black text-white tracking-tighter mb-4 block">
               ProTips<span className="text-emerald-500">Bet</span>
@@ -31,11 +26,11 @@ export default function Footer() {
               Premium sports analytics and high-confidence betting predictions. We track every ticket to provide 100% verified history and transparency.
             </p>
             <div className="flex items-center gap-4 text-zinc-500">
-              <a href="#" aria-label="Twitter" className="hover:text-emerald-400 transition-colors p-2 bg-zinc-900 rounded-lg border border-zinc-800 hover:border-emerald-500/30">
-                <TwitterIcon />
+              <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="Telegram" className="hover:text-emerald-400 transition-colors p-2 bg-zinc-900 rounded-lg border border-zinc-800 hover:border-emerald-500/30">
+                <Send size={18} />
               </a>
-              <a href="#" aria-label="Instagram" className="hover:text-emerald-400 transition-colors p-2 bg-zinc-900 rounded-lg border border-zinc-800 hover:border-emerald-500/30">
-                <InstagramIcon />
+              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="hover:text-emerald-400 transition-colors p-2 bg-zinc-900 rounded-lg border border-zinc-800 hover:border-emerald-500/30">
+                <MessageCircle size={18} />
               </a>
               <a href="mailto:contact@protipsbet.com" aria-label="Email us" className="hover:text-emerald-400 transition-colors p-2 bg-zinc-900 rounded-lg border border-zinc-800 hover:border-emerald-500/30">
                 <Mail size={18} />
@@ -43,7 +38,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Брзи Линкови */}
           <div>
             <h4 className="text-white font-bold mb-5 uppercase tracking-wider text-sm">Explore</h4>
             <ul className="space-y-3 text-sm text-zinc-400 font-medium">
@@ -54,7 +48,15 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Правни Линкови */}
+          <div>
+            <h4 className="text-white font-bold mb-5 uppercase tracking-wider text-sm">Resources</h4>
+            <ul className="space-y-3 text-sm text-zinc-400 font-medium">
+              <li><Link href="/leagues" className="hover:text-emerald-400 transition-colors">Predictions by League</Link></li>
+              <li><Link href="/glossary" className="hover:text-emerald-400 transition-colors">Betting Glossary</Link></li>
+              <li><Link href="/results" className="hover:text-emerald-400 transition-colors">Weekly Results Archive</Link></li>
+            </ul>
+          </div>
+
           <div>
             <h4 className="text-white font-bold mb-5 uppercase tracking-wider text-sm">Legal & Support</h4>
             <ul className="space-y-3 text-sm text-zinc-400 font-medium">
@@ -64,7 +66,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Задолжително Предупредување (Disclaimer) */}
           <div>
             <h4 className="text-white font-bold mb-5 uppercase tracking-wider text-sm">Disclaimer</h4>
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-4 flex items-start gap-3">
@@ -76,7 +77,6 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Долна Лента (Bottom Bar) */}
         <div className="border-t border-zinc-800/50 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-zinc-500 text-sm text-center md:text-left font-medium">
             © {new Date().getFullYear()} ProTipsBet. All rights reserved.
