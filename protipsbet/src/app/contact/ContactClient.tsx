@@ -28,7 +28,7 @@ export default function ContactClient() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        throw new Error(data?.message || "Испраќањето не успеа. Обиди се повторно.");
+        throw new Error(data?.message || "Failed to send message.");
       }
 
       setIsSubmitted(true);
@@ -37,7 +37,7 @@ export default function ContactClient() {
       setSubject("vip");
       setMessage("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Нешто тргна наопаку.");
+      setError(err instanceof Error ? err.message : "An error occurred while sending the message.");
     } finally {
       setSubmitting(false);
     }
@@ -58,7 +58,37 @@ export default function ContactClient() {
         
         {/* CONTACT INFO CARDS */}
         <div className="md:col-span-1 space-y-4">
-          
+            {/* WhatsApp Card */}
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 flex flex-col items-center text-center">
+            <div className="bg-[#25D366]/10 p-3 rounded-full text-[#25D366] mb-4">
+              <Phone size={24} />
+            </div>
+            <h3 className="text-white font-bold mb-1">WhatsApp</h3>
+            <p className="text-zinc-400 text-sm mb-4">Chat with us directly.</p>
+            <a 
+              href="https://wa.me/38978231801" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-[#25D366] text-sm font-bold hover:underline"
+            >
+              +389 78 231 801
+            </a>
+          </div>
+          {/* Email Card */}
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 flex flex-col items-center text-center">
+            <div className="bg-emerald-500/10 p-3 rounded-full text-emerald-400 mb-4">
+              <Mail size={24} />
+            </div>
+            <h3 className="text-white font-bold mb-1">Email Us</h3>
+            <p className="text-zinc-400 text-sm mb-4">For business & partnerships.</p>
+            <a 
+              href="mailto:support@protipsbet.com" 
+              className="text-emerald-400 text-sm font-bold hover:underline"
+            >
+              support@protipsbet.com
+            </a>
+          </div>
+        </div>
           {/* Telegram Card */}
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 flex flex-col items-center text-center">
             <div className="bg-[#0088cc]/10 p-3 rounded-full text-[#0088cc] mb-4">
@@ -76,38 +106,9 @@ export default function ContactClient() {
             </a>
           </div>
 
-          {/* WhatsApp Card */}
-          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 flex flex-col items-center text-center">
-            <div className="bg-[#25D366]/10 p-3 rounded-full text-[#25D366] mb-4">
-              <Phone size={24} />
-            </div>
-            <h3 className="text-white font-bold mb-1">WhatsApp</h3>
-            <p className="text-zinc-400 text-sm mb-4">Chat with us directly.</p>
-            <a 
-              href="https://wa.me/38978231801" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-[#25D366] text-sm font-bold hover:underline"
-            >
-              +389 78 231 801
-            </a>
-          </div>
+        
 
-          {/* Email Card */}
-          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 flex flex-col items-center text-center">
-            <div className="bg-emerald-500/10 p-3 rounded-full text-emerald-400 mb-4">
-              <Mail size={24} />
-            </div>
-            <h3 className="text-white font-bold mb-1">Email Us</h3>
-            <p className="text-zinc-400 text-sm mb-4">For business & partnerships.</p>
-            <a 
-              href="mailto:support@edgepredict.com" 
-              className="text-emerald-400 text-sm font-bold hover:underline"
-            >
-              support@protipsbet.com
-            </a>
-          </div>
-        </div>
+          
 
         {/* CONTACT FORM */}
         <div className="md:col-span-2">
