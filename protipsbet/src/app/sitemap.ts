@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getAllTips, buildSlug, isPubliclyRenderable } from "@/lib/predictions";
 import { getDistinctLeagues, slugifyLeague } from "@/lib/league-slug";
+import { getAllMarkets } from "@/lib/market-slug";
 import { GLOSSARY_TERMS } from "@/lib/glossary-data";
 import { getTipStatus } from "@/lib/tip-format";
 import { getISOWeekString } from "@/lib/iso-week";
@@ -14,8 +15,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/vip-tips",
     "/history",
     "/leagues",
+    "/markets",
     "/glossary",
     "/results",
+    "/sitemap-page",
     "/contact",
     "/partners",
     "/privacy",
@@ -46,6 +49,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  const marketEntries: MetadataRoute.Sitemap = getAllMarkets().map((m) => ({
+    url: `${BASE_URL}/markets/${m.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "daily" as const,
+    priority: 0.7,
+  }));
+
   const glossaryEntries: MetadataRoute.Sitemap = GLOSSARY_TERMS.map((t) => ({
     url: `${BASE_URL}/glossary/${t.slug}`,
     lastModified: new Date(),
@@ -67,5 +77,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.4,
   }));
 
-  return [...staticEntries, ...predictionEntries, ...leagueEntries, ...glossaryEntries, ...resultsEntries];
+  return [
+    ...staticEntries,
+    ...predictionEntries,
+    ...leagueEntries,
+    ...marketEntries,
+    ...glossaryEntries,
+    ...resultsEntries,
+  ];
 }

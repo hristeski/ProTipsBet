@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Calendar, TrendingUp, CheckCircle2, XCircle, Clock, Crown } from "lucide-react";
+import { Calendar, TrendingUp, CheckCircle2, XCircle, Clock, Crown, Trophy, Target } from "lucide-react";
 import { getAllTips, buildSlug, findTipBySlug, isPubliclyRenderable } from "@/lib/predictions";
 import { getTipStatus, formatDate, formatMatchTime } from "@/lib/tip-format";
 import { MARKET_LABELS, type Market } from "@/lib/tips-data";
+import { slugifyLeague } from "@/lib/league-slug";
+import { classifyMarket, marketSlug } from "@/lib/market-slug";
 import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 
 export const revalidate = 60;
@@ -34,7 +36,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const title = `${tip.homeTeam} vs ${tip.awayTeam} Prediction - ${formatDate(tip.matchDate)} | ProTipsBet`;
-  // Ако постои твоја анализа, ја користиме за description (уникатно, не темплејт)
   const description = tip.analysis
     ? tip.analysis.slice(0, 155)
     : `${tip.homeTeam} vs ${tip.awayTeam}: our ${tip.predictionType ?? "match"} prediction at odds @${Number(tip.odds).toFixed(2)}. ${tip.league ?? "Football"} match preview, verified track record.`;
@@ -79,9 +80,12 @@ export default async function PredictionPage({ params }: Props) {
   if (!tip) notFound();
 
   const status = getTipStatus(tip.result);
-  const marketKey = tip.predictionType?.toUpperCase() as Market | undefined;
-  const marketLabel = marketKey && MARKET_LABELS[marketKey] ? MARKET_LABELS[marketKey] : tip.predictionType || "Match Prediction";
+  const marketKey = classifyMarket(tip.predictionType);
+  const marketLabel = marketKey ? MARKET_LABELS[marketKey] : tip.predictionType || "Match Prediction";
   const pageUrl = `https://protipsbet.com/predictions/${slug}`;
+
+  const hasLeague = tip.league && tip.league !== "Unknown" && tip.league !== "VIP Only";
+  const leagueSlug = hasLeague ? slugifyLeague(tip.league!) : null;
 
   return (
     <div className="pb-24 px-4 pt-24 md:pt-32 max-w-3xl mx-auto">
@@ -118,8 +122,31 @@ export default async function PredictionPage({ params }: Props) {
       <h1 className="text-2xl md:text-4xl font-black text-white mb-2 leading-tight">
         {tip.homeTeam} vs {tip.awayTeam}
       </h1>
+
+      {/* Cross-linkovi kon league и market hub - го затвора silo circuit-от од двете страни */}
+      <div className="flex flex-wrap gap-x-5 gap-y-1 mb-6">
+        {hasLeague && leagueSlug && (
+          <Link
+            href={`/leagues/${leagueSlug}`}
+            className="inline-flex items-center gap-1.5 text-zinc-400 text-sm hover:text-emerald-400 transition-colors"
+          >
+            <Trophy size={14} />
+            All {tip.league} predictions
+          </Link>
+        )}
+        {marketKey && (
+          <Link
+            href={`/markets/${marketSlug(marketKey)}`}
+            className="inline-flex items-center gap-1.5 text-zinc-400 text-sm hover:text-emerald-400 transition-colors"
+          >
+            <Target size={14} />
+            All {MARKET_LABELS[marketKey]} tips
+          </Link>
+        )}
+      </div>
+
       <p className="text-zinc-400 text-sm mb-8">
-        {tip.league && tip.league !== "Unknown" && tip.league !== "VIP Only" ? tip.league : "Football"} match prediction and betting tip from ProTipsBet.
+        {hasLeague ? tip.league : "Football"} match prediction and betting tip from ProTipsBet.
       </p>
 
       <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 mb-8">
@@ -137,8 +164,6 @@ export default async function PredictionPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Твојата вистинска анализа - ако е внесена во admin формата.
-          Ова е ЕДИНСТВЕНА содржина по мач, не темплејт - ова е клучно за SEO. */}
       {tip.analysis ? (
         <div className="text-zinc-300 text-sm leading-relaxed mb-10">
           <h2 className="text-white font-bold text-base mb-2">Our Analysis</h2>
