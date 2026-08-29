@@ -66,12 +66,12 @@ export default function ContactClient() {
             <h3 className="text-white font-bold mb-1">WhatsApp</h3>
             <p className="text-zinc-400 text-sm mb-4">Chat with us directly.</p>
             <a 
-              href="https://wa.me/38978231801" 
+              href="https://wa.me/5493815694938" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-[#25D366] text-sm font-bold hover:underline"
             >
-              +389 78 231 801
+              +54 9 3815 69-4938
             </a>
           </div>
           {/* Email Card */}
@@ -88,7 +88,6 @@ export default function ContactClient() {
               support@protipsbet.com
             </a>
           </div>
-        </div>
           {/* Telegram Card */}
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 flex flex-col items-center text-center">
             <div className="bg-[#0088cc]/10 p-3 rounded-full text-[#0088cc] mb-4">
@@ -105,6 +104,8 @@ export default function ContactClient() {
               @protipsbet_admin
             </a>
           </div>
+        </div>
+          
 
         
 
