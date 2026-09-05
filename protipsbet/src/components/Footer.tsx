@@ -5,7 +5,7 @@ import { getAllTips, isPubliclyRenderable } from "@/lib/predictions";
 import { getDistinctLeagues, slugifyLeague } from "@/lib/league-slug";
 
 const TELEGRAM_URL = "https://t.me/protipsbet11";
-const WHATSAPP_URL = "https://api.whatsapp.com/send/?phone=38978231801&text&type=phone_number&app_absent=0";
+const WHATSAPP_URL = "https://api.whatsapp.com/send/?phone=5493815694938&text&type=phone_number&app_absent=0";
 
 export default async function Footer() {
   const tips = await getAllTips();

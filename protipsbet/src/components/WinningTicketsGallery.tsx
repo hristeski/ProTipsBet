@@ -35,8 +35,11 @@ export default async function WinningTicketsGallery() {
           Verified <span className="text-emerald-500">Wins</span>
         </h2>
         <p className="text-neutral-400 text-lg max-w-2xl mx-auto">
-          Real winning tickets, uploaded and publicly archived. Proof of our consistency.
-        </p>
+  Real winning tickets, uploaded and publicly archived. Proof of our consistency.
+</p>
+<span className="inline-block mt-3 text-xs font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+  {tickets.length}+ Verified Tickets
+</span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

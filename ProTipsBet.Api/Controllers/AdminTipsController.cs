@@ -15,11 +15,35 @@ namespace ProTipsBet.Api.Controllers
     {
         private readonly AppDbContext _db;
         private readonly IEmailService _emailService;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IConfiguration _configuration;
 
-        public AdminTipsController(AppDbContext db, IEmailService emailService)
+        public AdminTipsController(
+            AppDbContext db,
+            IEmailService emailService,
+            IHttpClientFactory httpClientFactory,
+            IConfiguration configuration)
         {
             _db = db;
             _emailService = emailService;
+            _httpClientFactory = httpClientFactory;
+            _configuration = configuration;
+        }
+
+        private async Task TriggerRevalidateAsync()
+        {
+            try
+            {
+                var secret = _configuration["Revalidate:Secret"];
+                if (string.IsNullOrEmpty(secret)) return;
+
+                var client = _httpClientFactory.CreateClient();
+                await client.PostAsync($"https://protipsbet.com/api/revalidate?secret={secret}", null);
+            }
+            catch
+            {
+                // тивко fail - revalidate не смее да го скрши зачувувањето
+            }
         }
 
         [HttpGet]
@@ -68,76 +92,71 @@ namespace ProTipsBet.Api.Controllers
 
             _db.Tips.Add(tip);
             await _db.SaveChangesAsync();
+            await TriggerRevalidateAsync();
 
-           try
-{
-    string subject;
-    string body;
-    List<string> targetEmails;
+            try
+            {
+                string subject;
+                string body;
+                List<string> targetEmails;
 
-    if (tip.IsVip)
-    {
-        subject = "💎 New VIP Tip Published!";
-        body = $@"
-            <div style='font-family: Arial, sans-serif; padding: 20px;'>
-                <h2 style='color: #d97706;'>A new VIP prediction is waiting for you!</h2>
-                <p>We just published a new VIP tip for <strong>{tip.MatchDate:dd MMM yyyy}</strong>.</p>
-                <p>Log in to your ProTipsBet account now to see the latest premium prediction and secure your profit.</p>
-                <br/>
-                <a href='https://protipsbet.com/login' style='background-color: #d97706; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;'>View VIP Tip</a>
-            </div>";
+                if (tip.IsVip)
+                {
+                    subject = "💎 New VIP Tip Published!";
+                    body = $@"
+                        <div style='font-family: Arial, sans-serif; padding: 20px;'>
+                            <h2 style='color: #d97706;'>A new VIP prediction is waiting for you!</h2>
+                            <p>We just published a new VIP tip for <strong>{tip.MatchDate:dd MMM yyyy}</strong>.</p>
+                            <p>Log in to your ProTipsBet account now to see the latest premium prediction and secure your profit.</p>
+                            <br/>
+                            <a href='https://protipsbet.com/login' style='background-color: #d97706; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;'>View VIP Tip</a>
+                        </div>";
 
-        targetEmails = await _db.Users
-            .Where(u => u.IsVip && u.IsActive)
-            .Select(u => u.Email)
-            .ToListAsync();
-    }
-    else
-    {
-        subject = "🔥 New FREE Tip Available!";
-        body = $@"
-            <div style='font-family: Arial, sans-serif; padding: 20px;'>
-                <h2 style='color: #2563eb;'>We just posted a new FREE tip!</h2>
-                <p>A new free prediction for <strong>{tip.MatchDate:dd MMM yyyy}</strong> is now live on our platform.</p>
-                <p>Head over to ProTipsBet to check it out before the match starts.</p>
-                <br/>
-                <a href='https://protipsbet.com/free-tips' style='background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;'>View Free Tip</a>
-            </div>";
+                    targetEmails = await _db.Users
+                        .Where(u => u.IsVip && u.IsActive)
+                        .Select(u => u.Email)
+                        .ToListAsync();
+                }
+                else
+                {
+                    subject = "🔥 New FREE Tip Available!";
+                    body = $@"
+                        <div style='font-family: Arial, sans-serif; padding: 20px;'>
+                            <h2 style='color: #2563eb;'>We just posted a new FREE tip!</h2>
+                            <p>A new free prediction for <strong>{tip.MatchDate:dd MMM yyyy}</strong> is now live on our platform.</p>
+                            <p>Head over to ProTipsBet to check it out before the match starts.</p>
+                            <br/>
+                            <a href='https://protipsbet.com/free-tips' style='background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;'>View Free Tip</a>
+                        </div>";
 
-        targetEmails = await _db.Users
-            .Where(u => u.IsActive)
-            .Select(u => u.Email)
-            .ToListAsync();
-    }
+                    targetEmails = await _db.Users
+                        .Where(u => u.IsActive)
+                        .Select(u => u.Email)
+                        .ToListAsync();
+                }
 
-    // NEW: додаваме ги и newsletter-претплатниците (visitors без account)
-    // на истата листа, dedupe-ирано за да некој не добие двоен мејл
-    // ако случајно веќе е и регистриран корисник со ист email.
-    var newsletterEmails = await _db.NewsletterSubscribers
-        .Where(s => s.IsActive)
-        .Select(s => s.Email)
-        .ToListAsync();
+                var newsletterEmails = await _db.NewsletterSubscribers
+                    .Where(s => s.IsActive)
+                    .Select(s => s.Email)
+                    .ToListAsync();
 
-    targetEmails = targetEmails
-        .Union(newsletterEmails, StringComparer.OrdinalIgnoreCase)
-        .ToList();
+                targetEmails = targetEmails
+                    .Union(newsletterEmails, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
 
-    if (targetEmails.Any())
-    {
-        var emailTasks = targetEmails.Select(email => _emailService.SendEmailAsync(email, subject, body));
-        await Task.WhenAll(emailTasks);
-    }
-}
-catch
-{
-}
+                if (targetEmails.Any())
+                {
+                    var emailTasks = targetEmails.Select(email => _emailService.SendEmailAsync(email, subject, body));
+                    await Task.WhenAll(emailTasks);
+                }
+            }
+            catch
+            {
+            }
 
             return Ok(tip);
         }
 
-        // НОВО: целосна измена на постоечки тип (тимови, датум, коефициент, VIP, публикација, итн.)
-        // За разлика од UpdateResult подолу (кој менува само Win/Loss/Void), овој endpoint
-        // ги презапишува сите полиња на типот одеднаш - тоа е она што го користи Edit копчето.
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTip(int id, [FromBody] UpdateTipDto request)
         {
@@ -157,7 +176,6 @@ catch
             tip.Analysis = request.Analysis ?? tip.Analysis;
             tip.IsPublished = request.IsPublished;
 
-            // Опционално менување на резултатот директно од edit формата
             if (!string.IsNullOrEmpty(request.Result) &&
                 Enum.TryParse<TipResult>(request.Result, true, out var parsedResult))
             {
@@ -165,6 +183,7 @@ catch
             }
 
             await _db.SaveChangesAsync();
+            await TriggerRevalidateAsync();
 
             return Ok(new TipResponse
             {
@@ -192,6 +211,7 @@ catch
             {
                 tip.Result = parsedResult;
                 await _db.SaveChangesAsync();
+                await TriggerRevalidateAsync();
                 return Ok();
             }
             return BadRequest("Invalid result value.");
@@ -205,6 +225,7 @@ catch
 
             _db.Tips.Remove(tip);
             await _db.SaveChangesAsync();
+            await TriggerRevalidateAsync();
 
             return Ok(new { message = "Tip deleted successfully." });
         }
@@ -223,7 +244,6 @@ catch
         public string? Analysis { get; set; }
     }
 
-    // НОВО: DTO за UpdateTip - исто како CreateTipDto плус опционален Result
     public class UpdateTipDto
     {
         public string HomeTeam { get; set; } = string.Empty;
@@ -235,7 +255,7 @@ catch
         public bool IsVip { get; set; }
         public bool IsPublished { get; set; }
         public string? Analysis { get; set; }
-        public string? Result { get; set; } // "Pending" / "Win" / "Loss" / "Void"
+        public string? Result { get; set; }
     }
 
     public class UpdateResultDto

@@ -31,11 +31,10 @@ namespace ProTipsBet.Api.Controllers
             }
 
             var tips = await _db.Tips
-                .Where(t => t.IsPublished)
-                .OrderByDescending(t => t.MatchDate)
-                .Take(50)
-                .Select(t => new
-                {
+    .Where(t => t.IsPublished)
+    .OrderByDescending(t => t.MatchDate)
+    .Select(t => new
+    {
                     t.Id,
                     t.MatchDate,
                     t.Odds,

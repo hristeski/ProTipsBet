@@ -38,8 +38,10 @@ export default async function ConfidenceStatsBar() {
         href="/history"
         className="max-w-4xl mx-auto flex items-center justify-center gap-3 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl px-6 py-4 hover:bg-emerald-500/10 transition-colors"
       >
-        <ShieldCheck className="text-emerald-400 shrink-0" size={22} />
-        <p className="text-sm md:text-base font-bold text-white text-center">
+<div className="relative shrink-0">
+  <ShieldCheck className="text-emerald-400" size={22} />
+  <span className="pulse-dot absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-400" />
+</div>        <p className="text-sm md:text-base font-bold text-white text-center">
           <span className="text-emerald-400">{stats.winRate}% Win Rate</span> across{" "}
           <span className="text-emerald-400">{stats.total} verified predictions</span> — see the full public track record
         </p>

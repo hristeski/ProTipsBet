@@ -172,7 +172,7 @@ export default function VipTipsClient({
         <div className="flex justify-center py-6">
           <Loader2 className="animate-spin text-neutral-600" size={20} />
         </div>
-      ) : !isUserVip ? (
+            ) : !isUserVip ? (
         <div className="border-t border-neutral-900 pt-10 md:pt-14">
           <div className="text-center mb-8 md:mb-10">
             <h2 className="text-2xl md:text-4xl font-black mb-2 text-white">
@@ -181,6 +181,12 @@ export default function VipTipsClient({
             <p className="text-neutral-500 text-sm md:text-base">
               Daily, Weekly, or Monthly — pick the access that fits how you bet.
             </p>
+            <Link
+              href="/contact"
+              className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-zinc-400 hover:text-emerald-400 transition-colors"
+            >
+              Not sure which plan fits? Contact us →
+            </Link>
           </div>
 
           <PricingPlans />

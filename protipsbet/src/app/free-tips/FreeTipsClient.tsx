@@ -130,7 +130,14 @@ export default function FreeTipsClient({ initialTips }: { initialTips: ApiTip[] 
         <div className="text-center py-16 text-zinc-500 text-sm">No pending tips for this market right now.</div>
       )}
 
-      <BannerWall title="Sponsored" banners={FREE_TIPS_BANNERS} size="small" />
+           <BannerWall title="Sponsored" banners={FREE_TIPS_BANNERS} size="small" />
+
+      <Link
+        href="/contact"
+        className="mt-10 flex items-center justify-center gap-2 text-sm font-bold text-zinc-400 hover:text-emerald-400 transition-colors"
+      >
+        Questions about a tip? Contact us →
+      </Link>
 
       <div className="mt-16">
         <div className="flex items-center justify-between gap-2 mb-6">
