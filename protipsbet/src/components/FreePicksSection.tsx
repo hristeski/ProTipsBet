@@ -35,7 +35,7 @@ export default function FreePicksSection({ todayTips, yesterdayTips }: Props) {
           </p>
         </div>
         <h2 className="text-3xl font-black text-white mb-2">Today's Free Picks</h2>
-        <p className="text-zinc-400 text-sm mb-3">Test our accuracy. For 100%confidence combos, upgrade to VIP.</p>
+        <p className="text-zinc-400 text-sm mb-3">Test our accuracy. For 100% confidence combos, upgrade to VIP.</p>
         {todayTips.length > 0 && (
           <span className="inline-flex items-center gap-1.5 text-xs font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
             <Zap size={12} /> {todayTips.length} {todayTips.length === 1 ? "Pick" : "Picks"} Live Now
@@ -112,7 +112,7 @@ export default function FreePicksSection({ todayTips, yesterdayTips }: Props) {
           </div>
 
           <h3 className="text-2xl md:text-3xl font-black text-white text-center mb-2">
-            Unlock Today's Premium Safe Correct Score Matches
+            Get Premium Safe Correct Score Matches
           </h3>
           <p className="text-zinc-400 text-sm text-center max-w-md mx-auto mb-6">
             While others get 1-2 free tips analysis, VIP members unlock our 100% safe tickets — higher odds, Guarantee 100% wins, bigger profit!
@@ -120,8 +120,8 @@ export default function FreePicksSection({ todayTips, yesterdayTips }: Props) {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 max-w-xl mx-auto">
             {[
-              { icon: TrendingUp, text: "Higher-odds combos" },
-              { icon: Sparkles, text: "Deep match analysis" },
+              { icon: TrendingUp, text: "100% Sure Football Matches" },
+              { icon: Sparkles, text: "Correct Score Matches" },
               { icon: Lock, text: "Exclusive daily access" },
             ].map((f, i) => (
               <div key={i} className="flex flex-col items-center text-center gap-2 bg-zinc-950/50 border border-zinc-800 rounded-xl p-3">
