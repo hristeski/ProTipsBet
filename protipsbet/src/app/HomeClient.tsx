@@ -10,8 +10,8 @@ import Testimonials from "@/components/Testimonials";
 import WinRateTable from "@/components/WinRateTable";
 import { HowItWorks, AboutUs } from "@/components/LandingSections";
 import { HOME_BANNERS } from "@/lib/banners";
-import { getTipStatus, formatMatchTime } from "@/lib/tip-format";
 import FAQ from "@/components/FAQ";
+import FreePicksSection from "@/components/FreePicksSection";
 
 interface ApiTip {
   id: number;
@@ -27,13 +27,13 @@ interface ApiTip {
 
 interface Props {
   initialFreeTips: ApiTip[];
+  yesterdayFreeTips: ApiTip[];
   confidenceBar?: ReactNode;
   winningGallery?: ReactNode;
 }
 
-export default function HomeClient({ initialFreeTips, confidenceBar, winningGallery }: Props) {
+export default function HomeClient({ initialFreeTips, yesterdayFreeTips, confidenceBar, winningGallery }: Props) {
   const partners = ["BET365", "PINNACLE", "SOFASCORE", "1XBET", "BINANCE PAY", "SKRILL"];
-  const freeTips = initialFreeTips;
 
   return (
     <div className="w-full bg-zinc-950 text-zinc-50 font-sans">
@@ -114,42 +114,8 @@ export default function HomeClient({ initialFreeTips, confidenceBar, winningGall
         <BannerWall title="Sponsored" banners={HOME_BANNERS} />
       </div>
 
-      {/* 5. TODAY'S FREE PICKS — SSR, доаѓа веднаш во HTML */}
-      <section id="free-picks" className="px-6 pb-24 max-w-4xl mx-auto">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl font-black text-white mb-2">Today's Free Picks</h2>
-          <p className="text-zinc-400 text-sm">Test our accuracy. For high-confidence combos, upgrade to VIP.</p>
-        </div>
-
-        {freeTips.length === 0 ? (
-          <div className="text-center py-12 border border-zinc-800 border-dashed rounded-2xl text-zinc-500 text-sm">
-            No free picks published yet today — check back soon.
-          </div>
-        ) : (
-          <div className="flex flex-wrap justify-center gap-4">
-            {freeTips.map((tip) => (
-              <div key={tip.id} className="w-full md:w-[calc(50%-0.5rem)]">
-                <TipCard
-                  league={tip.league && tip.league !== "Unknown" ? tip.league : "Football"}
-                  matchTime={formatMatchTime(tip.matchDate)}
-                  homeTeam={tip.homeTeam}
-                  awayTeam={tip.awayTeam}
-                  prediction={tip.predictionType || "No prediction"}
-                  odds={Number(tip.odds) || 0}
-                  status={getTipStatus(tip.result)}
-                  isVip={false}
-                />
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="text-center mt-8">
-          <Link href="/free-tips" className="text-emerald-400 text-sm font-bold hover:underline inline-flex items-center gap-1">
-            All free picks + archive <ArrowRight size={14} />
-          </Link>
-        </div>
-      </section>
+      {/* 5. FREE PICKS — today's pending picks and yesterday's results */}
+      <FreePicksSection todayTips={initialFreeTips} yesterdayTips={yesterdayFreeTips} />
 
       {/* 6. ABOUT US */}
       <AboutUs />

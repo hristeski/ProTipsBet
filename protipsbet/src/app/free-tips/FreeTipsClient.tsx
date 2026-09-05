@@ -7,16 +7,17 @@ import { CheckCircle2, XCircle, Filter, Archive, ChevronDown, ChevronUp } from "
 import TipCard from "@/components/TipCard";
 import BannerWall from "@/components/BannerWall";
 import { FREE_TIPS_BANNERS } from "@/lib/banners";
-import { MARKET_LABELS, type Market } from "@/lib/tips-data";
-import { getTipStatus, formatMatchTime, formatDate } from "@/lib/tip-format";
+import { MARKET_LABELS } from "@/lib/tips-data";
+import { getTipStatus, formatMatchTime, formatDate, matchesMarketFilter } from "@/lib/tip-format";
 import { buildSlug } from "@/lib/prediction-slug";
 import { API_BASE } from "@/lib/api";
 
-const FILTERS: { key: Market | "all"; label: string }[] = [
+const FILTERS: { key: string; label: string }[] = [
   { key: "all", label: "All" },
   { key: "1X2", label: MARKET_LABELS["1X2"] },
   { key: "BTTS", label: MARKET_LABELS.BTTS },
   { key: "OU25", label: MARKET_LABELS.OU25 },
+  { key: "HTFT", label: "HT/FT" },
 ];
 
 const ARCHIVE_PREVIEW_COUNT = 8;
@@ -35,7 +36,7 @@ interface ApiTip {
 
 export default function FreeTipsClient({ initialTips }: { initialTips: ApiTip[] }) {
   const [tips, setTips] = useState<ApiTip[]>(initialTips);
-  const [filter, setFilter] = useState<Market | "all">("all");
+  const [filter, setFilter] = useState<string>("all");
   const [showAllArchive, setShowAllArchive] = useState(false);
 
   const refetchTips = useCallback(async () => {
@@ -64,8 +65,7 @@ export default function FreeTipsClient({ initialTips }: { initialTips: ApiTip[] 
 
   const filteredActiveTips = activeTips.filter((t) => {
     if (filter === "all") return true;
-    const predictionType = String(t.predictionType ?? "").toUpperCase();
-    return predictionType.includes(filter);
+    return matchesMarketFilter(t.predictionType, filter);
   });
 
   const archiveTips = allFreeTips.filter((t) => getTipStatus(t.result) !== "pending");
@@ -130,7 +130,7 @@ export default function FreeTipsClient({ initialTips }: { initialTips: ApiTip[] 
         <div className="text-center py-16 text-zinc-500 text-sm">No pending tips for this market right now.</div>
       )}
 
-           <BannerWall title="Sponsored" banners={FREE_TIPS_BANNERS} size="small" />
+      <BannerWall title="Sponsored" banners={FREE_TIPS_BANNERS} size="small" />
 
       <Link
         href="/contact"

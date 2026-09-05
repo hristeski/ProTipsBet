@@ -6,6 +6,7 @@ import ReviewStructuredData from "@/components/ReviewStructuredData";
 import ConfidenceStatsBar from "@/components/ConfidenceStatsBar";
 import WinningTicketsGallery from "@/components/WinningTicketsGallery";
 import { API_BASE } from "@/lib/api";
+import { isToday, isYesterday } from "@/lib/tip-format";
 
 interface ApiTip {
   id: number;
@@ -19,32 +20,42 @@ interface ApiTip {
   isVip: boolean;
 }
 
-async function getFreeTips(): Promise<ApiTip[]> {
+async function getHomeTipsData() {
   try {
     const res = await fetch(`${API_BASE}/api/tips`, {
-      next: { revalidate: 60 }, //osvezhi na sekoi 60 sekundi
+      next: { revalidate: 60 },
     });
-    if (!res.ok) return [];
+    if (!res.ok) return { todayFreeTips: [], yesterdayFreeTips: [] };
     const data = await res.json();
     const tips: ApiTip[] = Array.isArray(data) ? data : [];
-    return tips
-      .filter((t) => !t.isVip && String(t.result).toLowerCase() === "pending")
-      .slice(0, 4);
+
+    const todayFreeTips = tips.filter(
+      (t) => !t.isVip && String(t.result).toLowerCase() === "pending" && isToday(t.matchDate)
+    );
+    const yesterdayFreeTips = tips.filter(
+      (t) => !t.isVip && String(t.result).toLowerCase() !== "pending" && isYesterday(t.matchDate)
+    );
+
+    return {
+      todayFreeTips: todayFreeTips.slice(0, 4),
+      yesterdayFreeTips: yesterdayFreeTips.slice(0, 4),
+    };
   } catch {
-    return [];
+    return { todayFreeTips: [], yesterdayFreeTips: [] };
   }
 }
 
 export default async function HomePage() {
-  const freeTips = await getFreeTips();
+  const { todayFreeTips, yesterdayFreeTips } = await getHomeTipsData();
 
   return (
     <>
       <FAQStructuredData />
-      <TipsStructuredData tips={freeTips} />
+      <TipsStructuredData tips={todayFreeTips} />
       <ReviewStructuredData />
       <HomeClient
-        initialFreeTips={freeTips}
+        initialFreeTips={todayFreeTips}
+        yesterdayFreeTips={yesterdayFreeTips}
         confidenceBar={<ConfidenceStatsBar />}
         winningGallery={<WinningTicketsGallery />}
       />
