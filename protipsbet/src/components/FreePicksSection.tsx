@@ -35,7 +35,7 @@ export default function FreePicksSection({ todayTips, yesterdayTips }: Props) {
           </p>
         </div>
         <h2 className="text-3xl font-black text-white mb-2">Today's Free Picks</h2>
-        <p className="text-zinc-400 text-sm mb-3">Test our accuracy. For high-confidence combos, upgrade to VIP.</p>
+        <p className="text-zinc-400 text-sm mb-3">Test our accuracy. For 100%confidence combos, upgrade to VIP.</p>
         {todayTips.length > 0 && (
           <span className="inline-flex items-center gap-1.5 text-xs font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
             <Zap size={12} /> {todayTips.length} {todayTips.length === 1 ? "Pick" : "Picks"} Live Now
@@ -112,10 +112,10 @@ export default function FreePicksSection({ todayTips, yesterdayTips }: Props) {
           </div>
 
           <h3 className="text-2xl md:text-3xl font-black text-white text-center mb-2">
-            Unlock Today's Premium Matches
+            Unlock Today's Premium Safe Correct Score Matches
           </h3>
           <p className="text-zinc-400 text-sm text-center max-w-md mx-auto mb-6">
-            While others get 1-2 free tips, VIP members unlock our full daily lineup — higher odds, deeper analysis, bigger profit.
+            While others get 1-2 free tips analysis, VIP members unlock our 100% safe tickets — higher odds, Guarantee 100% wins, bigger profit!
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 max-w-xl mx-auto">
