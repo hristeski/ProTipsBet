@@ -9,6 +9,7 @@ export interface PredictionTip {
   result?: string;
   isVip: boolean;
   analysis?: string; // НОВО
+  tags?: string;
 }
 
 function slugify(text: string): string {

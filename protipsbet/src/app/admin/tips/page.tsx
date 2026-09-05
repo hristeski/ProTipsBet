@@ -16,6 +16,7 @@ type Tip = {
   isVip: boolean;
   isPublished: boolean;
   analysis?: string;
+  tags?: string;
 };
 
 const emptyForm = () => ({
@@ -28,6 +29,7 @@ const emptyForm = () => ({
   isVip: false,
   isPublished: true,
   analysis: "",
+  tags: "",
 });
 
 // datetime-local инпутот бара "YYYY-MM-DDTHH:mm" без timezone info
@@ -100,6 +102,7 @@ export default function AdminTipsPage() {
       isVip: tip.isVip,
       isPublished: tip.isPublished,
       analysis: tip.analysis ?? "",
+      tags: tip.tags ?? "",
     });
     setIsModalOpen(true);
   };
@@ -250,6 +253,17 @@ export default function AdminTipsPage() {
               <div>
                 <label className="block text-xs font-bold text-neutral-400 mb-1 uppercase">Analysis (опционално)</label>
                 <textarea value={form.analysis} onChange={e => setForm({ ...form, analysis: e.target.value })} rows={3} className="w-full px-3 py-2 bg-neutral-950 border border-neutral-800 rounded-lg text-white focus:border-emerald-500 focus:outline-none resize-none" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-neutral-400 mb-1 uppercase">Tags (comma-separated)</label>
+                <input
+                  type="text"
+                  value={form.tags}
+                  onChange={e => setForm({ ...form, tags: e.target.value })}
+                  placeholder="e.g. Derby, High Odds, Weekend"
+                  className="w-full px-3 py-2 bg-neutral-950 border border-neutral-800 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                />
               </div>
 
               <div className="flex gap-6 py-2">

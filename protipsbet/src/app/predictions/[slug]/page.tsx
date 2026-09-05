@@ -145,6 +145,19 @@ export default async function PredictionPage({ params }: Props) {
         )}
       </div>
 
+      {tip.tags && (
+        <div className="flex flex-wrap gap-2 mb-6">
+          {tip.tags.split(",").map((tag) => tag.trim()).filter(Boolean).map((tag) => (
+            <span
+              key={tag}
+              className="inline-flex items-center bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs font-bold px-2.5 py-1 rounded-full"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
       <p className="text-zinc-400 text-sm mb-8">
         {hasLeague ? tip.league : "Football"} match prediction and betting tip from ProTipsBet.
       </p>
