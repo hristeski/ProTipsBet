@@ -42,7 +42,6 @@ namespace ProTipsBet.Api.Controllers
             }
             catch
             {
-                // тивко fail - revalidate не смее да го скрши зачувувањето
             }
         }
 
@@ -63,14 +62,16 @@ namespace ProTipsBet.Api.Controllers
                     Result = t.Result.ToString(),
                     IsVip = t.IsVip,
                     Analysis = t.Analysis,
-                    IsPublished = t.IsPublished
+                    Tags = t.Tags,
+                    IsPublished = t.IsPublished,
+                    CreatedAt = t.CreatedAt
                 }).ToListAsync();
 
             return Ok(tips);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Tip>> CreateTip([FromBody] CreateTipDto request)
+        public async Task<ActionResult<Tip>> CreateTip([FromBody] CreateTipRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -85,6 +86,7 @@ namespace ProTipsBet.Api.Controllers
                 Odds = request.Odds,
                 IsVip = request.IsVip,
                 Analysis = request.Analysis ?? "",
+                Tags = request.Tags,
                 IsPublished = request.IsPublished,
                 Result = TipResult.Pending,
                 CreatedAt = DateTime.UtcNow
@@ -158,7 +160,7 @@ namespace ProTipsBet.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateTip(int id, [FromBody] UpdateTipDto request)
+        public async Task<IActionResult> UpdateTip(int id, [FromBody] UpdateTipRequest request)
         {
             var tip = await _db.Tips.FindAsync(id);
             if (tip == null) return NotFound(new { message = "Типот не е пронајден." });
@@ -174,6 +176,7 @@ namespace ProTipsBet.Api.Controllers
             tip.Odds = request.Odds;
             tip.IsVip = request.IsVip;
             tip.Analysis = request.Analysis ?? tip.Analysis;
+            tip.Tags = request.Tags ?? tip.Tags;
             tip.IsPublished = request.IsPublished;
 
             if (!string.IsNullOrEmpty(request.Result) &&
@@ -197,7 +200,9 @@ namespace ProTipsBet.Api.Controllers
                 Result = tip.Result.ToString(),
                 IsVip = tip.IsVip,
                 Analysis = tip.Analysis,
-                IsPublished = tip.IsPublished
+                Tags = tip.Tags,
+                IsPublished = tip.IsPublished,
+                CreatedAt = tip.CreatedAt
             });
         }
 
@@ -223,39 +228,12 @@ namespace ProTipsBet.Api.Controllers
             var tip = await _db.Tips.FindAsync(id);
             if (tip == null) return NotFound();
 
-            _db.Tips.Remove(tip);
+            tip.IsPublished = false;
             await _db.SaveChangesAsync();
             await TriggerRevalidateAsync();
 
-            return Ok(new { message = "Tip deleted successfully." });
+            return Ok(new { message = "Tip unpublished successfully." });
         }
-    }
-
-    public class CreateTipDto
-    {
-        public string HomeTeam { get; set; } = string.Empty;
-        public string AwayTeam { get; set; } = string.Empty;
-        public string? League { get; set; }
-        public DateTime MatchDate { get; set; }
-        public string PredictionType { get; set; } = string.Empty;
-        public decimal Odds { get; set; }
-        public bool IsVip { get; set; }
-        public bool IsPublished { get; set; }
-        public string? Analysis { get; set; }
-    }
-
-    public class UpdateTipDto
-    {
-        public string HomeTeam { get; set; } = string.Empty;
-        public string AwayTeam { get; set; } = string.Empty;
-        public string? League { get; set; }
-        public DateTime MatchDate { get; set; }
-        public string PredictionType { get; set; } = string.Empty;
-        public decimal Odds { get; set; }
-        public bool IsVip { get; set; }
-        public bool IsPublished { get; set; }
-        public string? Analysis { get; set; }
-        public string? Result { get; set; }
     }
 
     public class UpdateResultDto

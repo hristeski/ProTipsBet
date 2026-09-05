@@ -24,8 +24,12 @@ namespace ProTipsBet.Api.DTOs
 
         public bool IsVip { get; set; } = false;
 
-        [MaxLength(500)]
+        [MaxLength(4000)]
         public string? Analysis { get; set; }
+
+        // НОВО: comma-separated tags за internal linking / категоризација
+        [MaxLength(300)]
+        public string? Tags { get; set; }
 
         public bool IsPublished { get; set; } = false;
     }
@@ -47,6 +51,7 @@ namespace ProTipsBet.Api.DTOs
         public string Result { get; set; } = string.Empty;
         public bool IsVip { get; set; }
         public string? Analysis { get; set; }
+        public string? Tags { get; set; }
         public bool IsPublished { get; set; }
         public DateTime CreatedAt { get; set; }
     }

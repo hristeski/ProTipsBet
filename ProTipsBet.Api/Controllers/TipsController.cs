@@ -41,6 +41,7 @@ namespace ProTipsBet.Api.Controllers
                     Result = t.Result.ToString(),
                     t.IsVip,
                     t.Analysis,
+                    Tags = t.Tags,
                     // НОВО: заклучувањето важи само додека резултатот е Pending.
                     // Штом мечот заврши (Win/Loss/Void), пикот станува целосно
                     // јавен за сите - исто како архивата на Free Tips.

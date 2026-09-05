@@ -27,7 +27,7 @@ namespace ProTipsBet.Api.Models
         public DateTime MatchDate { get; set; }
 
         [Required, MaxLength(100)]
-        public string PredictionType { get; set; } = string.Empty; // e.g. "Over 2.5", "1X2 - Home", "BTTS"
+        public string PredictionType { get; set; } = string.Empty;
 
         [Column(TypeName = "decimal(6,2)")]
         public decimal Odds { get; set; }
@@ -36,14 +36,18 @@ namespace ProTipsBet.Api.Models
 
         public bool IsVip { get; set; } = false;
 
-        [MaxLength(500)]
+        [MaxLength(4000)]
         public string? Analysis { get; set; }
+
+        // НОВО: comma-separated tags за internal linking / категоризација
+        // пр. "Derby,High Odds,Weekend" - се прикажуваат како clickable chips
+        [MaxLength(300)]
+        public string? Tags { get; set; }
 
         public bool IsPublished { get; set; } = false;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // Navigation
         public ICollection<TicketTip> TicketTips { get; set; } = new List<TicketTip>();
     }
 }
