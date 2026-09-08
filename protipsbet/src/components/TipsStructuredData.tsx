@@ -14,12 +14,11 @@ function estimateEndDate(startDate?: string): string | undefined {
   if (!startDate) return undefined;
   const start = new Date(startDate);
   if (Number.isNaN(start.getTime())) return undefined;
-  // фудбалски меч ~ 2 часа со прекини
   return new Date(start.getTime() + 2 * 60 * 60 * 1000).toISOString();
 }
 
 export default function TipsStructuredData({ tips }: { tips: ApiTip[] }) {
-  const validTips = tips.filter((t) => t.matchDate); // startDate е задолжителен - исфрли ги оние без датум
+  const validTips = tips.filter((t) => t.matchDate);
   if (validTips.length === 0) return null;
 
   const data = validTips.map((tip) => {
@@ -40,10 +39,6 @@ export default function TipsStructuredData({ tips }: { tips: ApiTip[] }) {
       location: {
         "@type": "Place",
         name: slugSafeLeague,
-        address: {
-          "@type": "PostalAddress",
-          addressCountry: "Unknown",
-        },
       },
       competitor: [
         { "@type": "SportsTeam", name: tip.homeTeam },
@@ -55,7 +50,8 @@ export default function TipsStructuredData({ tips }: { tips: ApiTip[] }) {
       ],
       organizer: {
         "@type": "Organization",
-        name: slugSafeLeague,
+        name: "ProTipsBet",
+        url: "https://protipsbet.com",
       },
       offers: {
         "@type": "Offer",
@@ -65,9 +61,6 @@ export default function TipsStructuredData({ tips }: { tips: ApiTip[] }) {
         availability: "https://schema.org/InStock",
         validFrom: tip.matchDate,
       },
-      ...(tip.league && tip.league !== "Unknown"
-        ? { superEvent: { "@type": "SportsEvent", name: tip.league } }
-        : {}),
     };
   });
 
