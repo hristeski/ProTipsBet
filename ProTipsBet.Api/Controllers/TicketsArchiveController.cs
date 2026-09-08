@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using ProTipsBet.Api.Data;
 using ProTipsBet.Api.DTOs;
 using ProTipsBet.Api.Models;
-using System.Text.Json; // Задолжително за парсирање на JSON
+using System.Text.Json;
 
 namespace ProTipsBet.Api.Controllers
 {
@@ -16,15 +16,38 @@ namespace ProTipsBet.Api.Controllers
     {
         private readonly AppDbContext _db;
         private readonly IWebHostEnvironment _env;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IConfiguration _configuration;
 
-        public TicketsArchiveController(AppDbContext db, IWebHostEnvironment env)
+        public TicketsArchiveController(
+            AppDbContext db,
+            IWebHostEnvironment env,
+            IHttpClientFactory httpClientFactory,
+            IConfiguration configuration)
         {
             _db = db;
             _env = env;
+            _httpClientFactory = httpClientFactory;
+            _configuration = configuration;
+        }
+
+        private async Task TriggerRevalidateAsync()
+        {
+            try
+            {
+                var secret = _configuration["Revalidate:Secret"];
+                if (string.IsNullOrEmpty(secret)) return;
+
+                var client = _httpClientFactory.CreateClient();
+                await client.PostAsync($"https://protipsbet.com/api/revalidate?secret={secret}", null);
+            }
+            catch
+            {
+            }
         }
 
         [HttpGet]
-        [AllowAnonymous] // <--- ОВА ЈА ПУШТА ЈАВНАТА СТРАНА ДА ГИ ВИДИ ТИКЕТИТЕ!
+        [AllowAnonymous]
         public async Task<IActionResult> GetAllTickets()
         {
             var tickets = await _db.TicketRecords
@@ -37,14 +60,12 @@ namespace ProTipsBet.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> UploadTicket([FromForm] UploadTicketRequest request)
         {
-            // 1. Сними ја сликата прво
             var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "tickets");
             if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
             var uniqueFileName = Guid.NewGuid().ToString() + "_" + request.Image.FileName;
             var filePath = Path.Combine(uploadsFolder, uniqueFileName);
             using (var stream = new FileStream(filePath, FileMode.Create)) { await request.Image.CopyToAsync(stream); }
 
-            // 2. Креирај го тикетот
             var ticket = new TicketRecord
             {
                 ImageUrl = $"/uploads/tickets/{uniqueFileName}",
@@ -56,7 +77,6 @@ namespace ProTipsBet.Api.Controllers
                 Legs = new List<TicketRecordLeg>()
             };
 
-            // 3. ПАРСИРАЊЕ - тука често паѓаше
             if (!string.IsNullOrEmpty(request.LegsJson))
             {
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
@@ -66,11 +86,11 @@ namespace ProTipsBet.Api.Controllers
 
             _db.TicketRecords.Add(ticket);
             await _db.SaveChangesAsync();
+            await TriggerRevalidateAsync();
+
             return Ok(new { message = "Успешно!" });
         }
 
-        // НОВО: Edit постоечки тикет — ова недостасуваше, затоа Edit копчето
-        // од admin/archive страницата фрлаше грешка (немаше route за PUT).
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTicket(int id, [FromForm] UploadTicketRequest request)
         {
@@ -80,7 +100,6 @@ namespace ProTipsBet.Api.Controllers
 
             if (ticket == null) return NotFound(new { message = "Тикетот не е пронајден." });
 
-            // Слика: замени само ако е прикачена нова (при edit сликата не е задолжителна)
             if (request.Image != null && request.Image.Length > 0)
             {
                 var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "tickets");
@@ -93,7 +112,6 @@ namespace ProTipsBet.Api.Controllers
                     await request.Image.CopyToAsync(stream);
                 }
 
-                // избриши ја старата слика од дискот
                 var oldPath = Path.Combine(_env.WebRootPath, ticket.ImageUrl.TrimStart('/'));
                 if (System.IO.File.Exists(oldPath)) System.IO.File.Delete(oldPath);
 
@@ -105,7 +123,6 @@ namespace ProTipsBet.Api.Controllers
             ticket.MatchDate = request.MatchDate;
             ticket.IsVip = request.IsVip;
 
-            // Замени ги старите legs со новите испратени од формата
             if (!string.IsNullOrEmpty(request.LegsJson))
             {
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
@@ -113,12 +130,14 @@ namespace ProTipsBet.Api.Controllers
 
                 if (parsedLegs != null)
                 {
-                    _db.RemoveRange(ticket.Legs); // избриши ги старите редови
+                    _db.RemoveRange(ticket.Legs);
                     ticket.Legs = parsedLegs;
                 }
             }
 
             await _db.SaveChangesAsync();
+            await TriggerRevalidateAsync();
+
             return Ok(new { message = "Тикетот е ажуриран." });
         }
 
@@ -133,6 +152,7 @@ namespace ProTipsBet.Api.Controllers
 
             _db.TicketRecords.Remove(ticket);
             await _db.SaveChangesAsync();
+            await TriggerRevalidateAsync();
 
             return Ok(new { message = "Тикетот е избришан." });
         }

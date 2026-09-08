@@ -90,22 +90,22 @@ export default function AdminTipsPage() {
     setIsModalOpen(true);
   };
 
-  const openEditModal = (tip: Tip) => {
-    setEditingId(tip.id);
-    setForm({
-      homeTeam: tip.homeTeam,
-      awayTeam: tip.awayTeam,
-      league: tip.league ?? "",
-      matchDate: toDateTimeLocal(tip.matchDate),
-      predictionType: tip.predictionType,
-      odds: tip.odds,
-      isVip: tip.isVip,
-      isPublished: tip.isPublished,
-      analysis: tip.analysis ?? "",
-      tags: tip.tags ?? "",
-    });
-    setIsModalOpen(true);
-  };
+ const openEditModal = (tip: Tip) => {
+  setEditingId(tip.id);
+  setForm({
+    homeTeam: tip.homeTeam,
+    awayTeam: tip.awayTeam,
+    league: tip.league ?? "",
+    matchDate: toDateTimeLocal(tip.matchDate),
+    predictionType: tip.predictionType,
+    odds: tip.odds,
+    isVip: tip.isVip,
+    isPublished: tip.isPublished,
+    analysis: tip.analysis ?? "",
+    tags: tip.tags ?? "",
+  });
+  setIsModalOpen(true);
+};
 
   const closeModal = () => {
     setIsModalOpen(false);
